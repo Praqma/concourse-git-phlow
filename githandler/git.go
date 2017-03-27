@@ -17,6 +17,12 @@ func Clone(URL string, path string) (output string, err error) {
 	return
 }
 
+//Clone ...
+func CloneCurrentDir(URL string) (output string, err error) {
+	output, err = executor.ExecuteCommand("git", "clone", URL)
+	return
+}
+
 //CheckOut ...
 func CheckOut(branch string) error {
 	_, err := executor.ExecuteCommand("git", "checkout", branch)
