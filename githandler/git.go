@@ -7,6 +7,10 @@ import (
 	"github.com/groenborg/git-phlow/executor"
 )
 
+func PhlowReadyBranch() (name string, err error) {
+	return executor.ExecuteCommand("git", "phlow", "agent", "upnext")
+}
+
 //Clone ...
 func Clone(URL string, path string) (output string, err error) {
 	output, err = executor.ExecuteCommand("git", "clone", URL, path)
