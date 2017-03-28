@@ -8,13 +8,28 @@ type CheckRequest struct {
 
 //InRequest ...
 type InRequest struct {
-	Source  Source  `json:"source"`
-	Version Version `json:"version"`
+	Source   Source   `json:"source"`
+	Version  Version  `json:"version"`
 }
 
 type InResponse struct {
-	Version  Version `json:"version"`
+	Version  Version  `json:"version"`
 	MetaData Metadata `json:"metadata"`
+}
+
+type OutResponse struct {
+	Version  Version  `json:"version"`
+	MetaData Metadata `json:"metadata"`
+}
+
+type OutRequest struct {
+	Source  Source    `json:"source"`
+	Version Version   `json:"version"`
+	Params  OutParams `json:"params"`
+}
+
+type OutParams struct {
+	Repository string `json:"repository"`
 }
 
 //Source ...
