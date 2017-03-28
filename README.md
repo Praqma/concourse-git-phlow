@@ -1,6 +1,21 @@
 # concourse git phlow
 
 
+#### using the resource
+```yaml
+resources:
+- name: test
+ type: git-phlow
+ source:
+   prefixready: ready   
+   prefixwip: wip
+   branch: master
+   url: https://github.com/praqma/phlow-test.git
+   username: {{github-username}}
+   password: {{github-password}}
+
+```
+
 #### params
 ```yaml
 resource_types:
