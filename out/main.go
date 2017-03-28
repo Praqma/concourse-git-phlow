@@ -3,8 +3,14 @@ package main
 import (
 	"fmt"
 	"os"
+	"github.com/groenborg/pip/githandler"
 )
 
 func main() {
-	fmt.Fprintln(os.Stdout, "hello world from out")
+
+
+	_, err := githandler.Push()
+	if err != nil {
+
+	}
 }

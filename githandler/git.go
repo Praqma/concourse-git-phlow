@@ -15,7 +15,9 @@ func LS() {
 }
 
 func PhlowReadyBranch() (name string, err error) {
-	return executor.ExecuteCommand("git", "phlow", "agent", "upnext")
+	name, err = executor.ExecuteCommand("git", "phlow", "agent", "upnext")
+	name = strings.TrimSpace(name)
+	return
 }
 
 //Clone ...
@@ -53,13 +55,18 @@ func Add() error {
 }
 
 //Commit ...
+func Branch() (string, error) {
+	return executor.ExecuteCommand("git", "branch", "-av")
+}
+
+//Commit ...
 func Commit(message string) (string, error) {
 	return executor.ExecuteCommand("git", "commit", "-m", message)
 }
 
 //Fetch ...
 func Fetch() error {
-	_, err := executor.ExecuteCommand("git", "fetch", "--all")
+	_, err := executor.ExecuteCommand("git", "fetch", "--all", "--prune")
 	return err
 }
 

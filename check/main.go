@@ -22,11 +22,12 @@ func main() {
 	}
 
 	if doesExist(basePath) {
+		fmt.Fprintln(os.Stderr,"exists")
 		ref = GetRef(basePath)
 	} else {
+		fmt.Fprintln(os.Stderr,"not exists")
 		getRepo(basePath, request.Source.URL)
 		ref = GetRef(basePath)
-
 	}
 
 	versions := []models.Version{}
@@ -61,6 +62,13 @@ func GetRef(basePath string) (ref string) {
 		fmt.Fprintln(os.Stderr, "rev parse fail:", err.Error())
 		os.Exit(1)
 	}
+
+	err = githandler.CheckOut("master")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "checkout fail:", err.Error())
+		os.Exit(1)
+	}
+
 	return ref
 
 }

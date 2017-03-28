@@ -6,6 +6,7 @@ import (
 	"github.com/groenborg/pip/models"
 	"encoding/json"
 	"github.com/groenborg/pip/githandler"
+	"strings"
 )
 
 func main() {
@@ -36,6 +37,27 @@ func main() {
 	err = os.Chdir(destination)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "could not change dir:", err.Error())
+		os.Exit(1)
+	}
+
+	out, err := githandler.Branch()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "branch failed:", err.Error())
+		os.Exit(1)
+	}
+	fmt.Fprintln(os.Stderr, out)
+
+	_, err = githandler.PhlowReadyBranch()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Getting ready branch fail:", err.Error())
+		os.Exit(1)
+	}
+	fmt.Fprintf(os.Stderr, "locating sha branch: %s \n", request.Version.Sha)
+
+	fmt.Fprintf(os.Stderr, "Merging sha: %s with master\n", request.Version.Sha)
+	err = githandler.Merge(strings.TrimSpace(request.Version.Sha))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
 		os.Exit(1)
 	}
 
