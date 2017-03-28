@@ -15,5 +15,7 @@ chmod +x assets/check
 chmod +x assets/in
 chmod +x assets/out
 
-#docker build --no-cache -t groenborg/concourse-git-phlow:latest .
-#docker push groenborg/concourse-git-phlow:latest
+docker build --no-cache -t groenborg/concourse-git-phlow:latest .
+docker push groenborg/concourse-git-phlow:latest
+
+rm -rf assets/
