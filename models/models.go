@@ -12,9 +12,9 @@ type InRequest struct {
 	Version Version `json:"version"`
 }
 
-type OutRequest struct {
+type InResponse struct {
 	Version  Version `json:"version"`
-	MetaData []MetaData `json:"metadata"`
+	MetaData Metadata `json:"metadata"`
 }
 
 //Source ...
@@ -27,7 +27,9 @@ type Version struct {
 	Sha string `json:"sha"`
 }
 
-type MetaData struct {
+type Metadata []MetadataField
+
+type MetadataField struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
 }

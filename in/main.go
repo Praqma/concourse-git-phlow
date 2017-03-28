@@ -6,7 +6,6 @@ import (
 	"github.com/groenborg/pip/models"
 	"encoding/json"
 	"github.com/groenborg/pip/githandler"
-	"bufio"
 )
 
 func main() {
@@ -26,21 +25,11 @@ func main() {
 
 	var request models.InRequest
 
-	fmt.Println(os.Stderr, os.Stdin)
-
-	reader := bufio.NewReader(os.Stdin)
-	text, _ := reader.ReadString('\n')
-
-	fmt.Fprintln(os.Stderr, text)
-
-	err = json.Unmarshal([]byte(text), &request)
+	err = json.NewDecoder(os.Stdin).Decode(&request)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "OS in parsing errored")
 		os.Exit(1)
 	}
-
-	fmt.Fprintln(os.Stderr, request.Source.URL)
-	fmt.Fprintln(os.Stderr, request.Version.Sha)
 
 	getRepo(request.Source.URL, destination)
 
@@ -50,45 +39,26 @@ func main() {
 		os.Exit(1)
 	}
 
-	GetMeteData(request.Version.Sha)
+	GetMetadata(request.Version.Sha)
 }
 
-func GetMeteData(sha string) {
-	sha, err := githandler.CommitSha()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "commit sha failed:", err.Error())
-		os.Exit(1)
-	}
+func GetMetadata(sha string) {
+	ref, _ := githandler.CommitSha()
+	author, _ := githandler.Author()
+	date, _ := githandler.AuthorDate()
 
-	//author, err := githandler.Author()
-	//if err != nil {
-	//	fmt.Fprintln(os.Stderr, "author failed:", err.Error())
-	//	os.Exit(1)
-	//}
-	//
-	//date, err := githandler.AuthorDate()
-	//if err != nil {
-	//	fmt.Fprintln(os.Stderr, "date failed:", err.Error())
-	//	os.Exit(1)
-	//}
-
-	githandler.LS()
-
-	fmt.Fprintln(os.Stderr, "ABOUT TO RETURN JSON")
-
-	metadata := []models.MetaData{}
-	metadata = append(metadata, models.MetaData{Name: "commit", Value: sha})
-
-
-	req := models.OutRequest{Version: models.Version{Sha: sha}, MetaData: metadata}
-
-	fmt.Fprintln(os.Stderr, req)
-
-	json.NewEncoder(os.Stdout).Encode(req)
+	json.NewEncoder(os.Stdout).Encode(models.InResponse{
+		Version: models.Version{Sha: sha},
+		MetaData: models.Metadata{
+			{"commit", ref},
+			{"author", author},
+			{"authordate", date},
+		},
+	})
 }
 
 func getRepo(url, path string) {
-
+	fmt.Fprintf(os.Stderr, "Cloning into desitnation: %s from:  %s\n", path, url)
 	_, err := githandler.Clone(url, path)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "get repo failed:", err.Error())
