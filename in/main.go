@@ -6,8 +6,7 @@ import (
 	"github.com/groenborg/pip/models"
 	"encoding/json"
 	"github.com/groenborg/pip/githandler"
-	"path/filepath"
-	"io"
+	"bufio"
 )
 
 func main() {
@@ -19,31 +18,31 @@ func main() {
 
 	destination := os.Args[1]
 
-
-
 	err := os.MkdirAll(destination, 0755)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "mkdir all fails:", err.Error())
 		os.Exit(1)
 	}
 
-	file, err := os.Create(filepath.Join(destination, "cloned-repo"))
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "create file fails:", err.Error())
-		os.Exit(1)
-	}
-	defer file.Close()
-
 	var request models.InRequest
-	var sha string
 
-	err = json.NewDecoder(io.TeeReader(os.Stdin, file)).Decode(&request)
+	fmt.Println(os.Stderr, os.Stdin)
+
+	reader := bufio.NewReader(os.Stdin)
+	text, _ := reader.ReadString('\n')
+
+	fmt.Fprintln(os.Stderr, text)
+
+	err = json.Unmarshal([]byte(text), &request)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "OS in parsing errored")
 		os.Exit(1)
 	}
 
-	sha = request.Version.Sha
+	fmt.Fprintln(os.Stderr, request.Source.URL)
+	fmt.Fprintln(os.Stderr, request.Version.Sha)
+
+	getRepo(request.Source.URL, destination)
 
 	err = os.Chdir(destination)
 	if err != nil {
@@ -51,47 +50,46 @@ func main() {
 		os.Exit(1)
 	}
 
-	getRepo(request.Source.URL)
-
-	os.Chdir("./phlow-test")
-
-	err = githandler.Merge(sha)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "checkout fail:", err.Error())
-		os.Exit(1)
-	}
-
-	GetMeteData()
+	GetMeteData(request.Version.Sha)
 }
 
-func GetMeteData() {
+func GetMeteData(sha string) {
 	sha, err := githandler.CommitSha()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "commit sha failed:", err.Error())
 		os.Exit(1)
 	}
 
-	author, err := githandler.Author()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "author failed:", err.Error())
-		os.Exit(1)
-	}
+	//author, err := githandler.Author()
+	//if err != nil {
+	//	fmt.Fprintln(os.Stderr, "author failed:", err.Error())
+	//	os.Exit(1)
+	//}
+	//
+	//date, err := githandler.AuthorDate()
+	//if err != nil {
+	//	fmt.Fprintln(os.Stderr, "date failed:", err.Error())
+	//	os.Exit(1)
+	//}
 
-	date, err := githandler.AuthorDate()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "date failed:", err.Error())
-		os.Exit(1)
-	}
+	githandler.LS()
+
+	fmt.Fprintln(os.Stderr, "ABOUT TO RETURN JSON")
 
 	metadata := []models.MetaData{}
-	metadata = append(metadata, models.MetaData{Author: author, Commit: sha, AuthorDate: date})
+	metadata = append(metadata, models.MetaData{Name: "commit", Value: sha})
 
-	json.NewEncoder(os.Stdout).Encode(metadata)
+
+	req := models.OutRequest{Version: models.Version{Sha: sha}, MetaData: metadata}
+
+	fmt.Fprintln(os.Stderr, req)
+
+	json.NewEncoder(os.Stdout).Encode(req)
 }
 
-func getRepo(url string) {
+func getRepo(url, path string) {
 
-	_, err := githandler.CloneCurrentDir(url)
+	_, err := githandler.Clone(url, path)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "get repo failed:", err.Error())
 		os.Exit(1)

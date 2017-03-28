@@ -1,13 +1,19 @@
 package githandler
 
-import "github.com/groenborg/pip/executor"
+import (
+	"github.com/groenborg/pip/executor"
+	"strings"
+)
 
 func Author() (author string, err error) {
-	return executor.ExecuteCommand("git", "rev-parse", "HEAD")
+	return executor.ExecuteCommand("git", "log", "-1", "--format=format:%an")
 }
 
 func CommitSha() (sha string, err error) {
-	return executor.ExecuteCommand("git", "log", "-1", "--format=format:%an")
+	sha, err = executor.ExecuteCommand("git", "rev-parse", "HEAD")
+	sha = strings.TrimSpace(sha)
+	return
+
 }
 
 func AuthorDate() (date string, err error) {

@@ -5,7 +5,14 @@ import (
 	"strings"
 
 	"github.com/groenborg/git-phlow/executor"
+	"os"
+	"fmt"
 )
+
+func LS() {
+	out, _ := executor.ExecuteCommand("ls")
+	fmt.Fprintln(os.Stderr, out)
+}
 
 func PhlowReadyBranch() (name string, err error) {
 	return executor.ExecuteCommand("git", "phlow", "agent", "upnext")

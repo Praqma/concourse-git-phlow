@@ -12,6 +12,11 @@ type InRequest struct {
 	Version Version `json:"version"`
 }
 
+type OutRequest struct {
+	Version  Version `json:"version"`
+	MetaData []MetaData `json:"metadata"`
+}
+
 //Source ...
 type Source struct {
 	URL string `json:"url"`
@@ -23,7 +28,6 @@ type Version struct {
 }
 
 type MetaData struct {
-	Commit     string `json:"commit"`
-	Author     string `json:"author"`
-	AuthorDate string `json:"authorDate"`
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
