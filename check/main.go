@@ -13,7 +13,7 @@ import (
 func main() {
 	var request models.CheckRequest
 	var ref string
-	basePath := os.Getenv("TMPDIR") + "/cache"
+	destination := os.Getenv("TMPDIR") + "/cache"
 
 	err := json.NewDecoder(os.Stdin).Decode(&request)
 	if err != nil {
@@ -21,11 +21,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	if doesExist(basePath) {
-		ref = GetRef(basePath)
+	if doesExist(destination) {
+		ref = GetRef(destination)
 	} else {
-		repo.CloneRepoSource(request.Source.URL, basePath, request.Source.Username, request.Source.Password)
-		ref = GetRef(basePath)
+		repo.CloneRepoSource(request.Source.URL, destination, request.Source.Username, request.Source.Password)
+		ref = GetRef(destination)
 	}
 
 	versions := []models.Version{}

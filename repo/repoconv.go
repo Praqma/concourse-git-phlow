@@ -22,3 +22,10 @@ func CloneRepoSource(URL, path, username, password string) {
 		os.Exit(1)
 	}
 }
+
+func Check(e error, str string) {
+	if e != nil {
+		fmt.Fprintln(os.Stderr, str)
+		os.Exit(1)
+	}
+}

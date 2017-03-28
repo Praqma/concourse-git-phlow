@@ -6,7 +6,8 @@ import (
 	"github.com/groenborg/pip/models"
 	"encoding/json"
 	"github.com/groenborg/pip/githandler"
-	"strings"
+	"github.com/groenborg/pip/repo"
+	"io/ioutil"
 )
 
 func main() {
@@ -19,47 +20,30 @@ func main() {
 	destination := os.Args[1]
 
 	err := os.MkdirAll(destination, 0755)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "mkdir all fails:", err.Error())
-		os.Exit(1)
-	}
+	repo.Check(err, "cannot make dir")
 
 	var request models.InRequest
 
 	err = json.NewDecoder(os.Stdin).Decode(&request)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "OS in parsing errored")
-		os.Exit(1)
-	}
+	repo.Check(err, "OS in parsing errored")
 
-	getRepo(request.Source.URL, destination)
+	repo.CloneRepoSource(request.Source.URL, destination, request.Source.Username, request.Source.Password)
 
 	err = os.Chdir(destination)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "could not change dir:", err.Error())
-		os.Exit(1)
-	}
+	repo.Check(err, "could not change dir")
 
-	out, err := githandler.Branch()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "branch failed:", err.Error())
-		os.Exit(1)
-	}
-	fmt.Fprintln(os.Stderr, out)
+	rbn, err := githandler.PhlowReadyBranch()
+	repo.Check(err, "an error")
+	fmt.Fprintln(os.Stderr, rbn)
 
-	_, err = githandler.PhlowReadyBranch()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "Getting ready branch fail:", err.Error())
-		os.Exit(1)
-	}
+	err = ioutil.WriteFile(".git/git-phlow-ready-branch", []byte(rbn), 0655)
+	repo.Check(err, "could not write to file")
+
 	fmt.Fprintf(os.Stderr, "locating sha branch: %s \n", request.Version.Sha)
-
 	fmt.Fprintf(os.Stderr, "Merging sha: %s with master\n", request.Version.Sha)
-	err = githandler.Merge(strings.TrimSpace(request.Version.Sha))
-	if err != nil {
-		fmt.Fprintf(os.Stderr, err.Error())
-		os.Exit(1)
-	}
+
+	err = githandler.Merge(request.Version.Sha)
+	repo.Check(err, "could not merge")
 
 	GetMetadata(request.Version.Sha)
 }

@@ -31,12 +31,6 @@ func BranchDelete(name, remote string) (string, error) {
 	return executor.ExecuteCommand("git", "push", remote, "--delete", name)
 }
 
-//Clone ...
-func CloneCurrentDir(URL string) (output string, err error) {
-	output, err = executor.ExecuteCommand("git", "clone", URL)
-	return
-}
-
 //CheckOut ...
 func CheckOut(branch string) error {
 	_, err := executor.ExecuteCommand("git", "checkout", branch)
@@ -44,7 +38,13 @@ func CheckOut(branch string) error {
 }
 
 func RevParse() (out string, err error) {
-	return executor.ExecuteCommand("git", "rev-parse", "HEAD")
+
+	str, err := executor.ExecuteCommand("git", "rev-parse", "HEAD")
+	if err != nil {
+		return "", err
+	}
+	str = strings.TrimSpace(str)
+	return str, nil
 }
 
 //Status ...

@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"github.com/groenborg/pip/githandler"
 	"strings"
-	"github.com/groenborg/pip/auth"
+	"github.com/groenborg/pip/repo"
 )
 
 func main() {
@@ -59,7 +59,7 @@ func main() {
 
 func HttpsPush(URL string, username, password string) {
 
-	url := auth.FormatURL(URL,username,password)
+	url := repo.FormatURL(URL, username, password)
 
 	fmt.Fprintf(os.Stderr, "pushing to: %s \n", URL)
 	_, err := githandler.PushHTTPS(url)
@@ -68,9 +68,6 @@ func HttpsPush(URL string, username, password string) {
 		os.Exit(1)
 	}
 }
-
-
-
 
 func remoteURLExtractor(url string) (ssh bool, http bool) {
 	//Extracts repo and org from ssh url format
