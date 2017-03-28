@@ -38,8 +38,16 @@ func main() {
 	out, _ := githandler.Branch()
 	fmt.Fprintln(os.Stderr, out)
 
+	ref, _ := githandler.RevParse()
+
+	_, err = githandler.Push()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "could not push:", err.Error())
+		os.Exit(1)
+	}
+
 	json.NewEncoder(os.Stdout).Encode(models.InResponse{
-		Version: models.Version{Sha: request.Version.Sha},
+		Version: models.Version{Sha: ref},
 		MetaData: models.Metadata{
 			{"author", "david"},
 		},
