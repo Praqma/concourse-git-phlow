@@ -86,6 +86,11 @@ func Push() (string, error) {
 	return executor.ExecuteCommand("git", "push")
 }
 
+//PushHTTPS ...
+func PushHTTPS(URL string) (string, error) {
+	return executor.ExecuteCommand("git", "push", "--repo", URL)
+}
+
 //Merge ...
 func Merge(branch string) error {
 	_, err := executor.ExecuteCommand("git", "merge", branch)

@@ -6,6 +6,7 @@ import (
 	"github.com/groenborg/pip/models"
 	"encoding/json"
 	"github.com/groenborg/pip/githandler"
+	"strings"
 )
 
 func main() {
@@ -37,14 +38,9 @@ func main() {
 
 	out, _ := githandler.Branch()
 	fmt.Fprintln(os.Stderr, out)
-
 	ref, _ := githandler.RevParse()
 
-	_, err = githandler.Push()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "could not push:", err.Error())
-		os.Exit(1)
-	}
+	HttpsPush(request.Source.URL, request.Source.Username, request.Source.Password)
 
 	json.NewEncoder(os.Stdout).Encode(models.InResponse{
 		Version: models.Version{Sha: ref},
@@ -52,4 +48,29 @@ func main() {
 			{"author", "david"},
 		},
 	})
+}
+
+func HttpsPush(URL string, username, password string) {
+	ct := strings.Replace(URL, "https://", "", 1)
+	pu := fmt.Sprintf("https://%s:%s@%s", username, password, ct)
+
+	fmt.Fprintf(os.Stderr, "pushing to: %s \n", URL)
+	_, err := githandler.PushHTTPS(pu)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "could not push to repository")
+		os.Exit(1)
+	}
+}
+
+func remoteURLExtractor(url string) (ssh bool, http bool) {
+	//Extracts repo and org from ssh url format
+	if strings.HasPrefix(url, "git@") {
+		return true, false
+	}
+	//Extracts repo and org from http url format
+	if strings.HasPrefix(url, "https") {
+		return false, true
+	}
+	//Clone from local repo
+	return false, false
 }

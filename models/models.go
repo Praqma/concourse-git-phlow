@@ -8,8 +8,8 @@ type CheckRequest struct {
 
 //InRequest ...
 type InRequest struct {
-	Source   Source   `json:"source"`
-	Version  Version  `json:"version"`
+	Source  Source  `json:"source"`
+	Version Version `json:"version"`
 }
 
 type InResponse struct {
@@ -34,7 +34,9 @@ type OutParams struct {
 
 //Source ...
 type Source struct {
-	URL string `json:"url"`
+	URL      string `json:"url"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 //Version ...
