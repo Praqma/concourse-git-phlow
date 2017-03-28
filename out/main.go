@@ -8,6 +8,7 @@ import (
 	"github.com/groenborg/pip/githandler"
 	"strings"
 	"github.com/groenborg/pip/repo"
+	"io/ioutil"
 )
 
 func main() {
@@ -35,24 +36,37 @@ func main() {
 		os.Exit(1)
 	}
 
-	name, err := githandler.PhlowReadyBranch()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "Getting ready branch fail:", err.Error())
-		os.Exit(1)
+	name, err := ioutil.ReadFile(".git/git-phlow-ready-branch")
+	repo.Check(err, "failed reading from branch")
+
+	fmt.Fprintln(os.Stderr, string(name))
+
+	if string(name) == "" {
+		fmt.Fprintln(os.Stderr, "No ready branch to integrate with master.. Exiting build")
+		PrintMeta()
+		os.Exit(0)
 	}
 
 	HttpsPush(request.Source.URL, request.Source.Username, request.Source.Password)
 
-	_, err = githandler.BranchDelete(name, "origin")
+	_, err = githandler.BranchDelete(string(name), "origin")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "branch could not be deleted:", err.Error())
 	}
+	PrintMeta()
+}
 
-	ref, _ := githandler.RevParse()
+func PrintMeta() {
+	ref, _ := githandler.CommitSha()
+	author, _ := githandler.Author()
+	date, _ := githandler.AuthorDate()
+
 	json.NewEncoder(os.Stdout).Encode(models.InResponse{
 		Version: models.Version{Sha: ref},
 		MetaData: models.Metadata{
-			{"author", "david"},
+			{"commit", ref},
+			{"author", author},
+			{"authordate", date},
 		},
 	})
 }

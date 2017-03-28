@@ -34,10 +34,16 @@ func main() {
 
 	rbn, err := githandler.PhlowReadyBranch()
 	repo.Check(err, "an error")
-	fmt.Fprintln(os.Stderr, rbn)
+
 
 	err = ioutil.WriteFile(".git/git-phlow-ready-branch", []byte(rbn), 0655)
 	repo.Check(err, "could not write to file")
+
+	if rbn == "" {
+		fmt.Fprintln(os.Stderr, "No ready branch to integrate with master.. Exiting build")
+		GetMetadata(request.Version.Sha)
+		os.Exit(0)
+	}
 
 	fmt.Fprintf(os.Stderr, "locating sha branch: %s \n", request.Version.Sha)
 	fmt.Fprintf(os.Stderr, "Merging sha: %s with master\n", request.Version.Sha)
