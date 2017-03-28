@@ -78,12 +78,3 @@ func GetMetadata(sha string) {
 		},
 	})
 }
-
-func getRepo(url, path string) {
-	fmt.Fprintf(os.Stderr, "Cloning into desitnation: %s from:  %s\n", path, url)
-	_, err := githandler.Clone(url, path)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "get repo failed:", err.Error())
-		os.Exit(1)
-	}
-}

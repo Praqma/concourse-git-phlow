@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"github.com/groenborg/pip/githandler"
 	"strings"
+	"github.com/groenborg/pip/auth"
 )
 
 func main() {
@@ -34,14 +35,20 @@ func main() {
 		os.Exit(1)
 	}
 
-	githandler.LS()
-
-	out, _ := githandler.Branch()
-	fmt.Fprintln(os.Stderr, out)
-	ref, _ := githandler.RevParse()
+	name, err := githandler.PhlowReadyBranch()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Getting ready branch fail:", err.Error())
+		os.Exit(1)
+	}
 
 	HttpsPush(request.Source.URL, request.Source.Username, request.Source.Password)
 
+	_, err = githandler.BranchDelete(name, "origin")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "branch could not be deleted:", err.Error())
+	}
+
+	ref, _ := githandler.RevParse()
 	json.NewEncoder(os.Stdout).Encode(models.InResponse{
 		Version: models.Version{Sha: ref},
 		MetaData: models.Metadata{
@@ -51,16 +58,19 @@ func main() {
 }
 
 func HttpsPush(URL string, username, password string) {
-	ct := strings.Replace(URL, "https://", "", 1)
-	pu := fmt.Sprintf("https://%s:%s@%s", username, password, ct)
+
+	url := auth.FormatURL(URL,username,password)
 
 	fmt.Fprintf(os.Stderr, "pushing to: %s \n", URL)
-	_, err := githandler.PushHTTPS(pu)
+	_, err := githandler.PushHTTPS(url)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "could not push to repository")
 		os.Exit(1)
 	}
 }
+
+
+
 
 func remoteURLExtractor(url string) (ssh bool, http bool) {
 	//Extracts repo and org from ssh url format

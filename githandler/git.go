@@ -26,6 +26,11 @@ func Clone(URL string, path string) (output string, err error) {
 	return
 }
 
+//BranchDelete ...
+func BranchDelete(name, remote string) (string, error) {
+	return executor.ExecuteCommand("git", "push", remote, "--delete", name)
+}
+
 //Clone ...
 func CloneCurrentDir(URL string) (output string, err error) {
 	output, err = executor.ExecuteCommand("git", "clone", URL)

@@ -7,10 +7,10 @@ import (
 
 	"github.com/groenborg/pip/models"
 	"github.com/groenborg/pip/githandler"
+	"github.com/groenborg/pip/repo"
 )
 
 func main() {
-
 	var request models.CheckRequest
 	var ref string
 	basePath := os.Getenv("TMPDIR") + "/cache"
@@ -22,19 +22,17 @@ func main() {
 	}
 
 	if doesExist(basePath) {
-		fmt.Fprintln(os.Stderr,"exists")
 		ref = GetRef(basePath)
 	} else {
-		fmt.Fprintln(os.Stderr,"not exists")
-		getRepo(basePath, request.Source.URL)
+		repo.CloneRepoSource(request.Source.URL, basePath, request.Source.Username, request.Source.Password)
 		ref = GetRef(basePath)
 	}
 
 	versions := []models.Version{}
-	versions = append(versions, models.Version{Sha: ref})
-
+	versions = append(versions, models.Version{
+		Sha: ref,
+	})
 	json.NewEncoder(os.Stdout).Encode(versions)
-
 }
 
 func GetRef(basePath string) (ref string) {
@@ -68,22 +66,10 @@ func GetRef(basePath string) (ref string) {
 		fmt.Fprintln(os.Stderr, "checkout fail:", err.Error())
 		os.Exit(1)
 	}
-
 	return ref
-
-}
-
-func getRepo(basePath, url string) {
-
-	_, err := githandler.Clone(url, basePath)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "GET REPO:", err.Error())
-		os.Exit(1)
-	}
 }
 
 func doesExist(basePath string) bool {
-
 	if _, err := os.Stat(basePath); os.IsNotExist(err) {
 		return false
 	}
