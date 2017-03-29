@@ -33,28 +33,43 @@ func main() {
 	repo.Check(err, "could not change dir")
 
 	rbn, err := githandler.PhlowReadyBranch()
-	repo.Check(err, "an error")
-
-
-	err = ioutil.WriteFile(".git/git-phlow-ready-branch", []byte(rbn), 0655)
-	repo.Check(err, "could not write to file")
+	repo.Check(err, "error in locating readybranch")
 
 	if rbn == "" {
 		fmt.Fprintln(os.Stderr, "No ready branch to integrate with master.. Exiting build")
-		GetMetadata(request.Version.Sha)
+		WriteRDYBranch("") //write an empty name
+		SendMetadata(request.Version.Sha)
 		os.Exit(0)
 	}
 
-	fmt.Fprintf(os.Stderr, "locating sha branch: %s \n", request.Version.Sha)
+	//Names the branch to the name plus wip prefix
+	wipBranchName := request.Source.PrefixWip + rbn
+	u := repo.FormatURL(request.Source.URL, request.Source.URL, request.Source.Password)
+
 	fmt.Fprintf(os.Stderr, "Merging sha: %s with master\n", request.Version.Sha)
-
 	err = githandler.Merge(request.Version.Sha)
-	repo.Check(err, "could not merge")
+	if err != nil {
+		repo.RenameRemoteBranch(u, "failed/"+rbn, rbn)
+		os.Exit(1)
+	}
 
-	GetMetadata(request.Version.Sha)
+	repo.RenameRemoteBranch(u, wipBranchName, rbn)
+	WriteRDYBranch(wipBranchName)
+	SendMetadata(request.Version.Sha)
 }
 
-func GetMetadata(sha string) {
+//WriteRDYBranch ...
+//writes the name of the branch to the file
+func WriteRDYBranch(name string) {
+	err := ioutil.WriteFile(".git/git-phlow-ready-branch", []byte(name), 0655)
+	if err != nil {
+		os.Exit(1)
+	}
+}
+
+//GetMetadata ...
+//sends the metadata to output
+func SendMetadata(sha string) {
 	ref, _ := githandler.CommitSha()
 	author, _ := githandler.Author()
 	date, _ := githandler.AuthorDate()

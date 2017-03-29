@@ -27,9 +27,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Fprintln(os.Stderr, request)
-	fmt.Fprintln(os.Stderr, destination)
-
 	err = os.Chdir(destination + "/" + request.Params.Repository)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "could not change dir:", err.Error())
@@ -37,13 +34,13 @@ func main() {
 	}
 
 	name, err := ioutil.ReadFile(".git/git-phlow-ready-branch")
-	repo.Check(err, "failed reading from branch")
+	repo.Check(err, "failed reading branch name from file")
 
 	fmt.Fprintln(os.Stderr, string(name))
 
 	if string(name) == "" {
 		fmt.Fprintln(os.Stderr, "No ready branch to integrate with master.. Exiting build")
-		PrintMeta()
+		SendMetadata()
 		os.Exit(0)
 	}
 
@@ -53,10 +50,10 @@ func main() {
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "branch could not be deleted:", err.Error())
 	}
-	PrintMeta()
+	SendMetadata()
 }
 
-func PrintMeta() {
+func SendMetadata() {
 	ref, _ := githandler.CommitSha()
 	author, _ := githandler.Author()
 	date, _ := githandler.AuthorDate()

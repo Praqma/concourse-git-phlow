@@ -45,11 +45,12 @@ type OutParams struct {
 //Source ...
 //configuration object for all steps
 type Source struct {
-	URL      string `json:"url"`
-	Master   string `json:"master"`
-	Prefix   string `json:"prefix"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	URL         string `json:"url"`
+	Master      string `json:"master"`
+	PrefixReady string `json:"prefixready"`
+	PrefixWip   string `json:"prefixwip"`
+	Username    string `json:"username"`
+	Password    string `json:"password"`
 }
 
 //Version ...
