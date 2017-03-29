@@ -46,13 +46,16 @@ func main() {
 
 	HttpsPush(request.Source.URL, request.Source.Username, request.Source.Password)
 
-	_, err = githandler.BranchDelete(string(name), "origin")
+	err = githandler.PushDeleteHTTPS("origin", string(name))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "branch could not be deleted:", err.Error())
+		os.Exit(1)
 	}
+
 	SendMetadata()
 }
 
+//SendMetadata ...
 func SendMetadata() {
 	ref, _ := githandler.CommitSha()
 	author, _ := githandler.Author()

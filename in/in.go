@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"github.com/groenborg/pip/githandler"
 	"github.com/groenborg/pip/repo"
-	"io/ioutil"
 )
 
 func main() {
@@ -32,19 +31,39 @@ func main() {
 	err = os.Chdir(destination)
 	repo.Check(err, "could not change dir")
 
+	githandler.Status()
+
 	rbn, err := githandler.PhlowReadyBranch()
 	repo.Check(err, "error in locating readybranch")
-
+	fmt.Fprintln(os.Stderr, rbn)
 	if rbn == "" {
 		fmt.Fprintln(os.Stderr, "No ready branch to integrate with master.. Exiting build")
-		WriteRDYBranch("") //write an empty name
+		repo.WriteRDYBranch("") //write an empty name
 		SendMetadata(request.Version.Sha)
 		os.Exit(0)
 	}
 
+	err = githandler.CheckOut(rbn)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "checkout failed: ", err.Error())
+		os.Exit(1)
+	}
+
+	err = githandler.CheckOut(request.Source.Master)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "could not checkout main branch:", err.Error())
+		os.Exit(1)
+	}
+
 	//Names the branch to the name plus wip prefix
 	wipBranchName := request.Source.PrefixWip + rbn
-	u := repo.FormatURL(request.Source.URL, request.Source.URL, request.Source.Password)
+	u := repo.FormatURL(request.Source.URL, request.Source.Username, request.Source.Password)
+
+	fmt.Fprintln(os.Stderr, "FORMATTET BRANCH: "+u)
+	fmt.Fprintln(os.Stderr, "WIP BRANCH: "+wipBranchName)
+	fmt.Fprintln(os.Stderr, "READY BRANCH: "+rbn)
+
+	repo.RenameRemoteBranch(u, wipBranchName, rbn)
 
 	fmt.Fprintf(os.Stderr, "Merging sha: %s with master\n", request.Version.Sha)
 	err = githandler.Merge(request.Version.Sha)
@@ -53,18 +72,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	repo.RenameRemoteBranch(u, wipBranchName, rbn)
-	WriteRDYBranch(wipBranchName)
+	repo.WriteRDYBranch(wipBranchName)
 	SendMetadata(request.Version.Sha)
-}
-
-//WriteRDYBranch ...
-//writes the name of the branch to the file
-func WriteRDYBranch(name string) {
-	err := ioutil.WriteFile(".git/git-phlow-ready-branch", []byte(name), 0655)
-	if err != nil {
-		os.Exit(1)
-	}
 }
 
 //GetMetadata ...

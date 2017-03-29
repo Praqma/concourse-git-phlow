@@ -6,6 +6,7 @@ import (
 
 	"github.com/groenborg/git-phlow/executor"
 	"fmt"
+	"os"
 )
 
 func PhlowReadyBranch() (name string, err error) {
@@ -18,11 +19,6 @@ func PhlowReadyBranch() (name string, err error) {
 func Clone(URL string, path string) (output string, err error) {
 	output, err = executor.ExecuteCommand("git", "clone", URL, path)
 	return
-}
-
-//BranchDelete ...
-func BranchDelete(name, remote string) (string, error) {
-	return executor.ExecuteCommand("git", "push", remote, "--delete", name)
 }
 
 //CheckOut ...
@@ -42,19 +38,25 @@ func RevParse() (out string, err error) {
 }
 
 //Fetch ...
+func Status() () {
+	out, _ := executor.ExecuteCommand("git", "branch", "-av")
+	fmt.Fprintln(os.Stderr, out)
+}
+
+//Fetch ...
 func Fetch() error {
-	_, err := executor.ExecuteCommand("git", "fetch", "--all", "--prune")
+	_, err := executor.ExecuteCommand("git", "fetch", "--prune")
 	return err
 }
 
-func PushRenameHTTPS(URL string, old, new string) (err error) {
+func PushRenameHTTPS(URL string, new, old string) (err error) {
 	rn := fmt.Sprintf("%s:%s", old, new)
-	_, err = executor.ExecuteCommand("git", "push", URL, "orgin", rn)
+	_, err = executor.ExecuteCommand("git", "push", "--repo", URL, "origin", strings.TrimSpace(rn))
 	return
 }
 
-func PushDeleteHTTPS(URL, name string) (err error) {
-	_, err = executor.ExecuteCommand("git", "push", URL, "--delete", name)
+func PushDeleteHTTPS(remote, name string) (err error) {
+	_, err = executor.ExecuteCommand("git", "push", remote, "--delete", name)
 	return
 }
 

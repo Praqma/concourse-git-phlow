@@ -42,6 +42,7 @@ func main() {
 func getRef(basePath string, request models.CheckRequest) (ref string) {
 	os.Chdir(basePath)
 
+
 	if err := githandler.Fetch(); err != nil {
 		fmt.Fprintln(os.Stderr, "could not fetch from remote: ", err.Error())
 		os.Exit(1)
