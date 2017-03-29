@@ -46,6 +46,8 @@ type OutParams struct {
 //configuration object for all steps
 type Source struct {
 	URL      string `json:"url"`
+	Master   string `json:"master"`
+	Prefix   string `json:"prefix"`
 	Username string `json:"username"`
 	Password string `json:"password"`
 }

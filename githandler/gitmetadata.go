@@ -15,7 +15,6 @@ func CommitSha() (sha string, err error) {
 	return
 
 }
-
 func AuthorDate() (date string, err error) {
 	return executor.ExecuteCommand("git", "log", "-1", "--format=format:%ai")
 }
