@@ -2,7 +2,7 @@
 set -e -u -x
 
 mkdir -p $GOPATH/src/github.com/praqma
-cp -R git-phlow/ $GOPATH/src/github.com/praqma
+cp -R concourse-git-phlow/ $GOPATH/src/github.com/praqma
 
 # RESOLVE DEPENDENCIES - TEST AND PRODUCTION
 cd $GOPATH/src/github.com/praqma/concourse-git-phlow
