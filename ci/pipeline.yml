@@ -1,0 +1,18 @@
+resources:
+- name: concourse-git-phlow
+  type: git
+  source:
+    uri: https://github.com/Praqma/concourse-git-phlow.git
+    branch: master
+    username: {{github-username}}
+    password: {{github-password}}
+
+- name: version
+  type: semver
+  source:
+    driver: git
+    uri: https://github.com/Praqma/concourse-git-phlow.git
+    username: {{github-username}}
+    password: {{github-password}}
+    branch: version
+    file: version

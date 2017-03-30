@@ -3,8 +3,7 @@ package githandler
 import (
 	"regexp"
 	"strings"
-
-	"github.com/groenborg/git-phlow/executor"
+	"github.com/groenborg/pip/executor"
 	"fmt"
 	"os"
 )
