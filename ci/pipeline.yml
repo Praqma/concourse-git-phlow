@@ -7,16 +7,15 @@ resource_types:
 resources:
 #PIP RESOURCE
 #running the pretested integration
-#- name: pretested-integration
-#  type: pip
-#  source:
-#    prefixready: ready/
-#    prefixwip: wip/
-#    master: master
-#    url: https://github.com/Praqma/concourse-git-phlow.git
-#    username: {{github-username}}
-#    password: {{github-password}}
-
+- name: pretested-integration
+  type: pip
+  source:
+    prefixready: ready/
+    prefixwip: wip/
+    master: master
+    url: https://github.com/Praqma/concourse-git-phlow.git
+    username: {{github-username}}
+    password: {{github-password}}
 
 #IMPORT THE BASE GIT RESOURCE SO WE ALWAYS HAVE THE BUILD FROM MASTER
 #DEPENDING ON THE TASK, ONLY CGP IS NECESSARY
@@ -32,9 +31,8 @@ resources:
   type: semver
   source:
     driver: git
-    uri: https://github.com/Praqma/concourse-git-phlow.git
-    username: {{github-username}}
-    password: {{github-password}}
+    uri: git@github.com:Praqma/concourse-git-phlow.git
+    private_key: {{github-private-key}} 
     branch: version
     file: version
 
@@ -45,27 +43,32 @@ resources:
     username: {{docker-username}}
     password: {{docker-password}}
   
-    
-
 jobs:
 
 #basic unit test run with pip
 #triggers resource and puts when successfull
 - name: unit-test-run
   plan:  
+  - get: pretested-integration
+    trigger: true
   - get: concourse-git-phlow
   - task: run-test
     file: concourse-git-phlow/ci/tasks/test.yml
-
+  - put: pretested-integration
+    params: 
+      repository: pretested-integration
+     
 - name: create-docker-resource
   plan:
   - get: concourse-git-phlow
-    
-    
-  - get: cgp-version 
+    passed: [unit-test-run]
+    trigger: true
+  - get: cgp-version
   - get: docker-image-builder
   - task: build-assets
     file: concourse-git-phlow/ci/tasks/build.yml
+  - put: cgp-version
+    params: {bump: patch} 
   - put: docker-image-builder
     params:
         build: concourse-git-phlow-artifacts
