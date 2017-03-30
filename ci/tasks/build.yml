@@ -9,7 +9,7 @@ inputs:
 - name: concourse-git-phlow
 
 outputs:
-- name: repo-assets
+- name: concourse-git-phlow-artifacts
 
 run:
   path: concourse-git-phlow/ci/scripts/build.sh
