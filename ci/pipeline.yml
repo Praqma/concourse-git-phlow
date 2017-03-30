@@ -58,7 +58,7 @@ jobs:
     params: 
       repository: pretested-integration
      
-- name: create-docker-resource
+- name: build-docker-image
   plan:
   - get: concourse-git-phlow
     passed: [unit-test-run]
