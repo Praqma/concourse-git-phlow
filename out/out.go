@@ -3,12 +3,15 @@ package main
 import (
 	"fmt"
 	"os"
-	"github.com/groenborg/pip/models"
+
 	"encoding/json"
-	"github.com/groenborg/pip/githandler"
+
 	"strings"
-	"github.com/groenborg/pip/repo"
+
 	"io/ioutil"
+	"github.com/praqma/concourse-git-phlow/githandler"
+	"github.com/praqma/concourse-git-phlow/models"
+	"github.com/praqma/concourse-git-phlow/repo"
 )
 
 func main() {

@@ -1,11 +1,12 @@
 package repo
 
 import (
-	"strings"
 	"fmt"
-	"os"
-	"github.com/groenborg/pip/githandler"
 	"io/ioutil"
+	"os"
+	"strings"
+
+	"github.com/praqma/concourse-git-phlow/githandler"
 )
 
 //WriteRDYBranch ...

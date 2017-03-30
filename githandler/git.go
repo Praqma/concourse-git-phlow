@@ -3,9 +3,10 @@ package githandler
 import (
 	"regexp"
 	"strings"
-	"github.com/groenborg/pip/executor"
+
 	"fmt"
 	"os"
+	"github.com/praqma/concourse-git-phlow/executor"
 )
 
 func PhlowReadyBranch() (name string, err error) {

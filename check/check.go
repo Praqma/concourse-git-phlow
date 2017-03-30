@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/groenborg/pip/models"
-	"github.com/groenborg/pip/githandler"
-	"github.com/groenborg/pip/repo"
+	"github.com/praqma/concourse-git-phlow/repo"
+	"github.com/praqma/concourse-git-phlow/models"
+	"github.com/praqma/concourse-git-phlow/githandler"
 )
 
 func main() {
@@ -33,7 +33,7 @@ func main() {
 	versions = append(versions, models.Version{
 		Sha: ref,
 	})
-	
+
 	json.NewEncoder(os.Stdout).Encode(versions)
 }
 
@@ -41,7 +41,6 @@ func main() {
 //returns the ref of the ready branch
 func getRef(basePath string, request models.CheckRequest) (ref string) {
 	os.Chdir(basePath)
-
 
 	if err := githandler.Fetch(); err != nil {
 		fmt.Fprintln(os.Stderr, "could not fetch from remote: ", err.Error())
