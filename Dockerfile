@@ -1,7 +1,7 @@
 FROM concourse/buildroot:git
 
-COPY assets/ /opt/resource/
-COPY git-phlow /bin
+COPY concourse-git-phlow/assets/ /opt/resource/
+COPY concourse-git-phlow/git-phlow /bin
 
 ENV TMPDIR=/gitphlow
 RUN mkdir $TMPDIR

@@ -60,15 +60,57 @@ jobs:
 - name: create-docker-resource
   plan:
   - get: concourse-git-phlow
-    passed: [unit-test-run]
-    trigger: true
+    
+    
   - get: cgp-version 
   - get: docker-image-builder
   - task: build-assets
-    file: concourse-git-phlow/ci/tasks/build.yml
+    config:
+     platform: linux
+     image_resource:
+       type: docker-image
+       source:
+         repository: golang
+         tag: '1.8'
+     inputs:
+       - name: concourse-git-phlow  
+     run:
+       path: sh
+       args:
+       - -exc
+       - |
+        ls
+        set -e -u -x
+
+        
+        
+
+        # RESOLVE DEPENDENCIES - TEST AND PRODUCTION
+        
+        go get -d -t -v ./...
+
+
+        export GOOS=linux
+        export GOARCH=amd64
+
+        go build -o concourse-git-phlow/assets/check concourse-git-phlow/check/check.go
+        go build -o concourse-git-phlow/assets/in concourse-git-phlow/in/in.go
+        go build -o concourse-git-phlow/assets/out concourse-git-phlow/out/out.go
+
+        chmod +x concourse-git-phlow/assets/check
+        chmod +x concourse-git-phlow/assets/in
+        chmod +x concourse-git-phlow/assets/out
+        cd concourse-git-phlow
+        ls 
+        cd assets
+        ls
+        
+        
+
+         
   - put: docker-image-builder
     params:
-        build: concourse-git-phlow/
+        build: concourse-git-phlow
         tag: cgp-version/version
 
     
