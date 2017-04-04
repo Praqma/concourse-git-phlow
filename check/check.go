@@ -8,6 +8,7 @@ import (
 	"github.com/praqma/concourse-git-phlow/repo"
 	"github.com/praqma/concourse-git-phlow/models"
 	"github.com/praqma/concourse-git-phlow/githandler"
+	"github.com/praqma/git-phlow/phlow"
 )
 
 func main() {
@@ -47,13 +48,13 @@ func getRef(basePath string, request models.CheckRequest) (ref string) {
 		os.Exit(1)
 	}
 
-	branchName, err := githandler.PhlowReadyBranch()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "Failed getting ready branch: ", err.Error())
+	branchName := phlow.UpNext("origin", request.Source.PrefixReady)
+	if branchName != "" {
+		fmt.Fprintln(os.Stderr, "No ready branches found")
 		os.Exit(1)
 	}
 
-	err = githandler.CheckOut(branchName)
+	err := githandler.CheckOut(branchName)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "checkout failed: ", err.Error())
 		os.Exit(1)

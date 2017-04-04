@@ -49,7 +49,7 @@ jobs:
        source:
          repository: groenborg/concourse-git-phlow
      inputs:
-       - name: test
+       - name: 
      outputs:
        - name: phlow
      run:
