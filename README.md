@@ -1,5 +1,5 @@
 ---
-maintainer: groenborg
+maintainer: groenborg, sharor
 ---
 # concourse git phlow
 
