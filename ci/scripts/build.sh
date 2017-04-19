@@ -5,6 +5,7 @@ go get github.com/tools/godep
 
 cd concourse-git-phlow
 godep restore
+cd ..
 
 export GOOS=linux
 export GOARCH=amd64
