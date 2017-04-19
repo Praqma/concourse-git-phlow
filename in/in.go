@@ -67,6 +67,7 @@ func main() {
 	fmt.Fprintf(os.Stderr, "Merging sha: %s with master\n", request.Version.Sha)
 	err = githandler.Merge(request.Version.Sha)
 	if err != nil {
+		githandler.CheckOut(wipBranchName) // ARHGGSJAHGDHJSAD
 		repo.RenameRemoteBranch(u, "failed/"+rbn, wipBranchName)
 		fmt.Fprintln(os.Stderr, "Merge failed, Aborting integration")
 		os.Exit(1)
