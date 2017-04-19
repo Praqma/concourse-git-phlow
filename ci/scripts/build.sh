@@ -3,14 +3,15 @@ set -e -u -x
 
 go get github.com/tools/godep
 
+cd conocurse-git-phlow
 godep restore
 
 export GOOS=linux
 export GOARCH=amd64
 
-godep go build -o concourse-git-phlow/assets/check concourse-git-phlow/check/check.go
-godep go build -o concourse-git-phlow/assets/in concourse-git-phlow/in/in.go
-godep go build -o concourse-git-phlow/assets/out concourse-git-phlow/out/out.go
+go build -o concourse-git-phlow/assets/check concourse-git-phlow/check/check.go
+go build -o concourse-git-phlow/assets/in concourse-git-phlow/in/in.go
+go build -o concourse-git-phlow/assets/out concourse-git-phlow/out/out.go
 
 chmod +x concourse-git-phlow/assets/check
 chmod +x concourse-git-phlow/assets/in
