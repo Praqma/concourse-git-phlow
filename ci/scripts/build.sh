@@ -1,7 +1,9 @@
 #!/bin/bash
 set -e -u -x
 
-godep go get -d -t -v ./...
+go get github.com/tools/godep
+
+godep restore
 
 export GOOS=linux
 export GOARCH=amd64
@@ -14,4 +16,4 @@ chmod +x concourse-git-phlow/assets/check
 chmod +x concourse-git-phlow/assets/in
 chmod +x concourse-git-phlow/assets/out
 
-#cp -R concourse-git-phlow/* concourse-git-phlow-artifacts/
+cp -R concourse-git-phlow/* concourse-git-phlow-artifacts/
