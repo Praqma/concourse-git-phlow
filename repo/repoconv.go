@@ -29,7 +29,7 @@ func RenameRemoteBranch(URL, newName, oldName string) {
 
 	err = githandler.PushDeleteHTTPS("origin", oldName)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "dangin")
+		fmt.Fprintf(os.Stderr, "Could not push delete branch %s \n", oldName)
 		os.Exit(1)
 	}
 }
