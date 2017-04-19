@@ -3,7 +3,7 @@ set -e -u -x
 
 go get github.com/tools/godep
 
-cd conocurse-git-phlow
+cd concourse-git-phlow
 godep restore
 
 export GOOS=linux
