@@ -9,12 +9,6 @@ import (
 	"github.com/praqma/concourse-git-phlow/executor"
 )
 
-func PhlowReadyBranch() (name string, err error) {
-	name, err = executor.ExecuteCommand("git", "phlow", "agent", "upnext")
-	name = strings.TrimSpace(name)
-	return
-}
-
 //Clone ...
 func Clone(URL string, path string) (output string, err error) {
 	output, err = executor.ExecuteCommand("git", "clone", URL, path)

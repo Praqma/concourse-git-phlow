@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/praqma/concourse-git-phlow/repo"
-	"github.com/praqma/concourse-git-phlow/models"
 	"github.com/praqma/concourse-git-phlow/githandler"
+	"github.com/praqma/concourse-git-phlow/models"
+	"github.com/praqma/concourse-git-phlow/repo"
 	"github.com/praqma/git-phlow/phlow"
 )
 
@@ -49,7 +49,7 @@ func getRef(basePath string, request models.CheckRequest) (ref string) {
 	}
 
 	branchName := phlow.UpNext("origin", request.Source.PrefixReady)
-	if branchName != "" {
+	if branchName == "" {
 		fmt.Fprintln(os.Stderr, "No ready branches found")
 	}
 

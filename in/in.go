@@ -6,9 +6,9 @@ import (
 
 	"encoding/json"
 
-	"github.com/praqma/concourse-git-phlow/repo"
-	"github.com/praqma/concourse-git-phlow/models"
 	"github.com/praqma/concourse-git-phlow/githandler"
+	"github.com/praqma/concourse-git-phlow/models"
+	"github.com/praqma/concourse-git-phlow/repo"
 	"github.com/praqma/git-phlow/phlow"
 )
 
@@ -36,7 +36,6 @@ func main() {
 
 	githandler.Status()
 
-
 	rbn := phlow.UpNext("origin", request.Source.PrefixReady)
 	if rbn == "" {
 		fmt.Fprintln(os.Stderr, "No ready branch to integrate with master.. Exiting build")
@@ -60,17 +59,16 @@ func main() {
 	//Names the branch to the name plus wip prefix
 	wipBranchName := request.Source.PrefixWip + rbn
 	u := repo.FormatURL(request.Source.URL, request.Source.Username, request.Source.Password)
-
-	fmt.Fprintln(os.Stderr, "FORMATTET BRANCH: "+u)
-	fmt.Fprintln(os.Stderr, "WIP BRANCH: "+wipBranchName)
-	fmt.Fprintln(os.Stderr, "READY BRANCH: "+rbn)
+	fmt.Fprintln(os.Stderr, "wip branch: "+wipBranchName)
+	fmt.Fprintln(os.Stderr, "ready branch: "+rbn)
 
 	repo.RenameRemoteBranch(u, wipBranchName, rbn)
 
 	fmt.Fprintf(os.Stderr, "Merging sha: %s with master\n", request.Version.Sha)
 	err = githandler.Merge(request.Version.Sha)
 	if err != nil {
-		repo.RenameRemoteBranch(u, "failed/"+rbn, rbn)
+		repo.RenameRemoteBranch(u, "failed/"+rbn, wipBranchName)
+		fmt.Fprintln(os.Stderr, "Merge failed, Aborting integration")
 		os.Exit(1)
 	}
 
