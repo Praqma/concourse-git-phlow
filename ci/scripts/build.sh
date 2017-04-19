@@ -1,9 +1,8 @@
 #!/bin/bash
 set -e -u -x
 
-go get github.com/tools/godep
-
 cd concourse-git-phlow
+go get github.com/tools/godep
 godep restore
 cd ..
 
