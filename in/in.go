@@ -9,6 +9,7 @@ import (
 	"github.com/praqma/concourse-git-phlow/repo"
 	"github.com/praqma/concourse-git-phlow/models"
 	"github.com/praqma/concourse-git-phlow/githandler"
+	"github.com/praqma/git-phlow/phlow"
 )
 
 func main() {
@@ -35,9 +36,8 @@ func main() {
 
 	githandler.Status()
 
-	rbn, err := githandler.PhlowReadyBranch()
-	repo.Check(err, "error in locating readybranch")
-	fmt.Fprintln(os.Stderr, rbn)
+
+	rbn := phlow.UpNext("origin", request.Source.PrefixReady)
 	if rbn == "" {
 		fmt.Fprintln(os.Stderr, "No ready branch to integrate with master.. Exiting build")
 		repo.WriteRDYBranch("") //write an empty name

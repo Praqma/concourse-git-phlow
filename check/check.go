@@ -51,7 +51,6 @@ func getRef(basePath string, request models.CheckRequest) (ref string) {
 	branchName := phlow.UpNext("origin", request.Source.PrefixReady)
 	if branchName != "" {
 		fmt.Fprintln(os.Stderr, "No ready branches found")
-		os.Exit(1)
 	}
 
 	err := githandler.CheckOut(branchName)
@@ -61,7 +60,7 @@ func getRef(basePath string, request models.CheckRequest) (ref string) {
 	}
 
 	if ref, err = githandler.RevParse(); err != nil {
-		fmt.Fprintln(os.Stderr, "could not retrieve ref:: ", err.Error())
+		fmt.Fprintln(os.Stderr, "could not retrieve ref: ", err.Error())
 		os.Exit(1)
 	}
 
