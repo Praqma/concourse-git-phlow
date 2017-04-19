@@ -6,6 +6,7 @@ import (
 
 	"fmt"
 	"os"
+
 	"github.com/praqma/concourse-git-phlow/executor"
 )
 
@@ -32,7 +33,7 @@ func RevParse() (out string, err error) {
 }
 
 //Fetch ...
-func Status() () {
+func Status() {
 	out, _ := executor.ExecuteCommand("git", "branch", "-av")
 	fmt.Fprintln(os.Stderr, out)
 }
@@ -45,6 +46,7 @@ func Fetch() error {
 
 func PushRenameHTTPS(URL string, new, old string) (err error) {
 	rn := fmt.Sprintf("%s:%s", old, new)
+	fmt.Fprintln(os.Stderr, rn)
 	_, err = executor.ExecuteCommand("git", "push", "--repo", URL, "origin", strings.TrimSpace(rn))
 	return
 }
