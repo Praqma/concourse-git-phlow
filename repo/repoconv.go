@@ -23,7 +23,7 @@ func WriteRDYBranch(name string) {
 func RenameRemoteBranch(URL, newName, oldName string) {
 	err := githandler.PushRenameHTTPS(URL, newName, oldName)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "could not push rename")
+		fmt.Fprintf(os.Stderr, "could not push rename old: %s new: %S", oldName, newName)
 		os.Exit(1)
 	}
 
