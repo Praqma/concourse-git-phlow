@@ -1,20 +1,25 @@
 #!/bin/bash
 set -e -u -x
 
-cd concourse-git-phlow
+C_PATH=$(pwd)
+
+mkdir -p $GOPATH/src/github.com/praqma
+cp -R concourse-git-phlow/ $GOPATH/src/github.com/praqma
+
+# RESOLVE DEPENDENCIES - TEST AND PRODUCTION
+cd $GOPATH/src/github.com/praqma/concourse-git-phlow
 go get github.com/tools/godep
 godep restore
-cd ..
 
 export GOOS=linux
 export GOARCH=amd64
 
-go build -o concourse-git-phlow/assets/check concourse-git-phlow/check/check.go
-go build -o concourse-git-phlow/assets/in concourse-git-phlow/in/in.go
-go build -o concourse-git-phlow/assets/out concourse-git-phlow/out/out.go
+godep go build -o $C_PATH/concourse-git-phlow/assets/check concourse-git-phlow/check/check.go
+godep go build -o $C_PATH/concourse-git-phlow/assets/in concourse-git-phlow/in/in.go
+godep go build -o $C_PATH/concourse-git-phlow/assets/out concourse-git-phlow/out/out.go
 
-chmod +x concourse-git-phlow/assets/check
-chmod +x concourse-git-phlow/assets/in
-chmod +x concourse-git-phlow/assets/out
+chmod +x $C_PATH/concourse-git-phlow/assets/check
+chmod +x $C_PATH/concourse-git-phlow/assets/in
+chmod +x $C_PATH/concourse-git-phlow/assets/out
 
-cp -R concourse-git-phlow/* concourse-git-phlow-artifacts/
+cp -R $C_PATH/concourse-git-phlow/* $C_PATH/concourse-git-phlow-artifacts/
