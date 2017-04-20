@@ -64,7 +64,7 @@ func main() {
 	//retrieve the next ready branch from origin with prefix
 	rbn := phlow.UpNext("origin", request.Source.PrefixReady)
 	if rbn == "" {
-		fmt.Fprintf(os.Stderr, "no branches with: %s available for integration with: %s", request.Source.PrefixReady, request.Source.Master)
+		fmt.Fprintf(os.Stderr, "no branches with: %s available for integration with: %s \n", request.Source.PrefixReady, request.Source.Master)
 		fmt.Fprintln(os.Stderr, "Exiting build")
 		repo.WriteRDYBranch("") //write an empty name
 
@@ -163,7 +163,12 @@ func SendMetadata(sha string) {
 	ref, _ := githandler.CommitSha()
 	author, _ := githandler.Author()
 	date, _ := githandler.AuthorDate()
+	fmt.Fprintln(os.Stderr, "ERROR HERE")
 
+	fmt.Fprintln(os.Stderr, ref)
+	fmt.Fprintln(os.Stderr, date)
+	fmt.Fprintln(os.Stderr, author)
+	fmt.Fprintln(os.Stderr, sha)
 	json.NewEncoder(os.Stdout).Encode(models.InResponse{
 		Version: models.Version{Sha: sha},
 		MetaData: models.Metadata{
