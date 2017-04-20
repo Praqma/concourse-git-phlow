@@ -7,8 +7,22 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/praqma/concourse-git-phlow/executor"
+	"github.com/praqma/git-phlow/executor"
 )
+
+//RebaseOnto ...
+//Rebase current branch onto delivery branch
+func RebaseOnto(br string) (err error) {
+	_, err = executor.ExecuteCommand("git", "rebase", br)
+	return
+}
+
+//MergeFFO ...
+//Only merge if it is a fast forward
+func MergeFFO(branch string) (err error) {
+	_, err = executor.ExecuteCommand("git", "merge", "--ff-only", branch)
+	return
+}
 
 //Clone ...
 func Clone(URL string, path string) (output string, err error) {
@@ -33,9 +47,9 @@ func RevParse() (out string, err error) {
 }
 
 //Fetch ...
-func Status() {
+func Status() string {
 	out, _ := executor.ExecuteCommand("git", "branch", "-av")
-	fmt.Fprintln(os.Stderr, out)
+	return out
 }
 
 //Fetch ...
@@ -59,12 +73,6 @@ func PushDeleteHTTPS(remote, name string) (err error) {
 //PushHTTPS ...
 func PushHTTPS(URL string) (string, error) {
 	return executor.ExecuteCommand("git", "push", "--repo", URL)
-}
-
-//Merge ...
-func Merge(branch string) error {
-	_, err := executor.ExecuteCommand("git", "merge", branch)
-	return err
 }
 
 //RemoteInfo ...
