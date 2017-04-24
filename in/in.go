@@ -163,12 +163,6 @@ func SendMetadata(sha string) {
 	ref, _ := githandler.CommitSha()
 	author, _ := githandler.Author()
 	date, _ := githandler.AuthorDate()
-	fmt.Fprintln(os.Stderr, "ERROR HERE")
-
-	fmt.Fprintln(os.Stderr, ref)
-	fmt.Fprintln(os.Stderr, date)
-	fmt.Fprintln(os.Stderr, author)
-	fmt.Fprintln(os.Stderr, sha)
 
 	str, err := json.Marshal(models.InResponse{
 		Version: models.Version{Sha: sha},

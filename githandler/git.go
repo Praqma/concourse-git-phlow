@@ -60,7 +60,6 @@ func Fetch() error {
 
 func PushRenameHTTPS(URL string, new, old string) (err error) {
 	rn := fmt.Sprintf("%s:%s", old, new)
-	fmt.Fprintln(os.Stderr, rn)
 	_, err = executor.ExecuteCommand("git", "push", "--repo", URL, "origin", strings.TrimSpace(rn))
 	return
 }
