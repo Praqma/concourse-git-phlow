@@ -51,6 +51,15 @@ func getRef(basePath string, request models.CheckRequest) (ref string) {
 	branchName := phlow.UpNext("origin", request.Source.PrefixReady)
 	if branchName == "" {
 		fmt.Fprintln(os.Stderr, "No ready branches found")
+
+		if request.Version.Sha != "" {
+			return request.Version.Sha
+		}
+
+		//First build with no ready branches
+		fmt.Fprintln(os.Stderr, "Create ready branch for this error to go away")
+		os.Exit(1)
+
 	}
 
 	err := githandler.CheckOut(branchName)
