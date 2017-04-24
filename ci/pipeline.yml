@@ -65,7 +65,7 @@ jobs:
 - name: unit-test-run
   plan:  
   - get: pretested-integration
-    trigger: true
+#    trigger: true
   - get: concourse-git-phlow
   - task: run-test
     file: concourse-git-phlow/ci/tasks/test.yml
@@ -82,8 +82,8 @@ jobs:
 - name: build-docker-image
   plan:
   - get: concourse-git-phlow
-    passed: [unit-test-run]
-    trigger: true
+ #   passed: [unit-test-run]
+  #  trigger: true
   - get: cgp-version
   - get: docker-image-builder
   - task: build-assets

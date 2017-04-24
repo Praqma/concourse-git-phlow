@@ -114,13 +114,13 @@ func ApplyAndRunStrategy(master string, ready string, s Strategy) (err error) {
 	var rb = func() error {
 		//checkout ready before rebase
 		if err := s.Checkout(ready); err != nil {
-			fmt.Fprintf(os.Stdout, "could not checkout %s \n", ready)
+			fmt.Fprintf(os.Stderr, "could not checkout %s \n", ready)
 			return err
 		}
 
 		if err := s.RebaseOnto(master); err != nil {
-			fmt.Fprintln(os.Stdout, "not able to rebase")
-			fmt.Fprintln(os.Stdout, err)
+			fmt.Fprintln(os.Stderr, "not able to rebase")
+			fmt.Fprintln(os.Stderr, err)
 			return err
 		}
 		return nil
@@ -129,11 +129,11 @@ func ApplyAndRunStrategy(master string, ready string, s Strategy) (err error) {
 	var ff = func() error {
 		//checkout master before fast-forward merge
 		if err := s.Checkout(master); err != nil {
-			fmt.Fprintf(os.Stdout, "Could not checkout %s \n", master)
+			fmt.Fprintf(os.Stderr, "Could not checkout %s \n", master)
 			return err
 		}
 		if err := s.MergeFF(ready); err != nil {
-			fmt.Fprintln(os.Stdout, "not able to fast forward")
+			fmt.Fprintln(os.Stderr, "not able to fast forward")
 			return err
 		}
 		return nil
@@ -169,7 +169,8 @@ func SendMetadata(sha string) {
 	fmt.Fprintln(os.Stderr, date)
 	fmt.Fprintln(os.Stderr, author)
 	fmt.Fprintln(os.Stderr, sha)
-	json.NewEncoder(os.Stdout).Encode(models.InResponse{
+
+	str, err := json.Marshal(models.InResponse{
 		Version: models.Version{Sha: sha},
 		MetaData: models.Metadata{
 			{"commit", ref},
@@ -177,4 +178,9 @@ func SendMetadata(sha string) {
 			{"authordate", date},
 		},
 	})
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
+	fmt.Fprint(string(str))
+	//json.NewEncoder(os.Stdout).Encode()
 }
