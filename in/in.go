@@ -181,6 +181,6 @@ func SendMetadata(sha string) {
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 	}
-	fmt.Fprint(string(str))
+	fmt.Fprint(os.Stdout, string(str))
 	//json.NewEncoder(os.Stdout).Encode()
 }
