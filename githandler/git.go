@@ -5,8 +5,6 @@ import (
 	"strings"
 
 	"fmt"
-	"os"
-
 	"github.com/praqma/git-phlow/executor"
 )
 
