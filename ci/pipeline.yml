@@ -4,7 +4,7 @@ resource_types:
   type: docker-image
   source:
     repository: groenborg/concourse-git-phlow
-    tag: '0.2.14'
+    tag: '0.2.16'
 
 #SLACK RESOURCE TYPE
 - name: slack-notification
@@ -63,7 +63,7 @@ jobs:
 #basic unit test run with pip
 #triggers resource and puts when successfull
 - name: unit-test-run
-  plan:  
+  plan:
   - get: pretested-integration
     trigger: true
   - get: concourse-git-phlow
@@ -76,7 +76,7 @@ jobs:
             unit-test-run passed
             https://concourse.kubernetes.praqma.cloud/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
   - put: pretested-integration
-    params: 
+    params:
       repository: pretested-integration
      
 - name: build-docker-image

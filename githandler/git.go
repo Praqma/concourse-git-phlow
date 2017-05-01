@@ -8,6 +8,11 @@ import (
 	"github.com/praqma/git-phlow/executor"
 )
 
+func ContainsCommit(master, sha string) (out string, err error) {
+	out, err = executor.ExecuteCommand("git", "branch", master, "--contains", sha)
+	return
+}
+
 //RebaseOnto ...
 //Rebase current branch onto delivery branch
 func RebaseOnto(br string) (err error) {
@@ -34,8 +39,13 @@ func CheckOut(branch string) error {
 	return err
 }
 
-func RevParse() (out string, err error) {
+func HardReset() error {
+	_, err := executor.ExecuteCommand("git", "reset", "--hard")
+	return err
+}
 
+//RevParse ...
+func RevParse() (out string, err error) {
 	str, err := executor.ExecuteCommand("git", "rev-parse", "HEAD")
 	if err != nil {
 		return "", err
@@ -44,8 +54,8 @@ func RevParse() (out string, err error) {
 	return str, nil
 }
 
-//Fetch ...
-func Status() string {
+//BranchList ...
+func BranchList() string {
 	out, _ := executor.ExecuteCommand("git", "branch", "-av")
 	return out
 }

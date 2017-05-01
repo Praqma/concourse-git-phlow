@@ -10,6 +10,7 @@ import (
 	"github.com/praqma/concourse-git-phlow/models"
 	"github.com/praqma/concourse-git-phlow/repo"
 	"github.com/praqma/git-phlow/phlow"
+	"strings"
 )
 
 //Strategy ...
@@ -57,12 +58,25 @@ func main() {
 	err = os.Chdir(destination)
 	repo.Check(err, "could not change dir")
 
+	//Check if sha from in is the same as master sha
+	//git branch master --contains <commit>
+	cco, err := githandler.ContainsCommit(request.Source.Master, request.Version.Sha)
+	fmt.Fprintln(os.Stderr, "cco: "+cco)
+	if strings.TrimSpace(cco) != "" {
+		//Exists on master
+		fmt.Fprintln(os.Stderr, "Found sha on master, no need for integration")
+		repo.WriteRDYBranch("")
+		SendMetadata(request.Version.Sha)
+		os.Exit(0)
+	}
+
 	//list all branches
-	out := githandler.Status()
+	out := githandler.BranchList()
 	fmt.Fprintln(os.Stderr, out)
 
 	//retrieve the next ready branch from origin with prefix
 	rbn := phlow.UpNext("origin", request.Source.PrefixReady)
+	fmt.Fprintln(os.Stderr, "Ready branch found: "+rbn)
 	if rbn == "" {
 		fmt.Fprintf(os.Stderr, "no branches with: %s available for integration with: %s \n", request.Source.PrefixReady, request.Source.Master)
 		fmt.Fprintln(os.Stderr, "Exiting build")
@@ -103,6 +117,7 @@ func main() {
 	}
 
 	repo.WriteRDYBranch(wipBranchName)
+	fmt.Fprintf(os.Stderr, "saving wip branch name: %s to dest: %s for use in out", wipBranchName, ".git/git-phlow-ready-branch")
 	SendMetadata(request.Version.Sha)
 }
 

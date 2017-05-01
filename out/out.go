@@ -41,9 +41,10 @@ func main() {
 
 	fmt.Fprintln(os.Stderr, string(name))
 
-	if string(name) == "" {
+	if string(name) == "" || !BranchExistsOnOrigin(string(name)) {
 		fmt.Fprintln(os.Stderr, "No ready branch to integrate with master.. Exiting build")
-		SendMetadata()
+		ref, _ := githandler.CommitSha()
+		SendMetadata(ref)
 		os.Exit(0)
 	}
 
@@ -51,21 +52,44 @@ func main() {
 
 	err = githandler.PushDeleteHTTPS("origin", string(name))
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "branch could not be deleted:", err.Error())
+		fmt.Fprintln(os.Stderr, "branch could not be deleted")
 		os.Exit(1)
 	}
 
-	SendMetadata()
+	ref, _ := githandler.CommitSha()
+	SendMetadata(ref)
+}
+
+//BranchExistsOnOrigin ...
+func BranchExistsOnOrigin(branchName string) (exists bool) {
+	branchName = strings.TrimSpace(branchName)
+	githandler.Fetch()
+
+	brOut := githandler.BranchList()
+	var list []string
+	for _, branch := range strings.Split(brOut, "\n") {
+		if branch != "" {
+			branch = strings.TrimSpace(branch)
+			list = append(list, branch)
+		}
+	}
+
+	for _, branch := range list {
+		if strings.Contains(branch, branchName) {
+			return true
+		}
+	}
+	return false
 }
 
 //SendMetadata ...
-func SendMetadata() {
+func SendMetadata(sha string) {
 	ref, _ := githandler.CommitSha()
 	author, _ := githandler.Author()
 	date, _ := githandler.AuthorDate()
 
 	json.NewEncoder(os.Stdout).Encode(models.InResponse{
-		Version: models.Version{Sha: ref},
+		Version: models.Version{Sha: sha},
 		MetaData: models.Metadata{
 			{"commit", ref},
 			{"author", author},

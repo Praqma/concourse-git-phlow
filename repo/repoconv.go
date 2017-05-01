@@ -14,6 +14,7 @@ import (
 func WriteRDYBranch(name string) {
 	err := ioutil.WriteFile(".git/git-phlow-ready-branch", []byte(name), 0655)
 	if err != nil {
+		fmt.Fprintln(os.Stderr,"Could not file for ready branch")
 		os.Exit(1)
 	}
 }
