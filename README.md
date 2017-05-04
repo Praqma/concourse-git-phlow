@@ -30,6 +30,9 @@ Note: versions below 0.2.31 are not finished and were used during development.
 
 
 ## Using the resource (Source configuration)
+Note: Whenever the tollgate does a rebase and fast-forward the check and in sha will differ. Do not be alarmed. 
+
+Furthermore, for a `ready/` branch to be found by check it need a new unique sha. This means repushing a failed branch will not trigger check. 
 - `prefixready`: *Required.* The branch prefix that Concourse uses to find new branches to integrate to tollgated branch. 
 - `prefixwip`: *Required.* This the prefix for the branch that Concourse uses while the job runs on the resource. 
   * While a branch has the work in progress prefix, the job is either running or has failed. It is intended as a way to allow the developer to recover their failed branch post fast forward merge.
