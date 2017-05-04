@@ -4,7 +4,7 @@ resource_types:
   type: docker-image
   source:
     repository: groenborg/concourse-git-phlow
-    tag: '1.0.0'
+    tag: '0.2.42'
 
 #SLACK RESOURCE TYPE
 - name: slack-notification
@@ -16,7 +16,7 @@ resource_types:
 resources:
 #PIP RESOURCE
 #running the pretested integration
-- name: pretested-integration
+- name: tollgate
   type: pip
   source:
     prefixready: ready/
@@ -64,7 +64,7 @@ jobs:
 #triggers resource and puts when successfull
 - name: unit-test-run
   plan:
-  - get: pretested-integration
+  - get: tollgate
     trigger: true
   - get: concourse-git-phlow
   - task: run-test
@@ -75,9 +75,9 @@ jobs:
         text: |
             unit-test-run passed
             https://concourse.bosh.praqma.cloud/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
-  - put: pretested-integration
+  - put: tollgate
     params:
-      repository: pretested-integration
+      repository: tollgate
      
 - name: build-docker-image
   plan:
