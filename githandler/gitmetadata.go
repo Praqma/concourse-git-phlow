@@ -2,7 +2,8 @@ package githandler
 
 import (
 	"strings"
-	"github.com/praqma/concourse-git-phlow/executor"
+
+	"github.com/praqma/git-phlow/executor"
 )
 
 func Author() (author string, err error) {

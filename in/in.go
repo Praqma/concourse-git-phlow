@@ -11,6 +11,7 @@ import (
 	"github.com/praqma/concourse-git-phlow/repo"
 	"github.com/praqma/git-phlow/phlow"
 	"strings"
+	"github.com/praqma/concourse-git-phlow/concourse"
 )
 
 //Strategy ...
@@ -24,14 +25,17 @@ type Strategy interface {
 type GitStrategy struct {
 }
 
+//CheckOut ..
 func (g *GitStrategy) Checkout(br string) error {
 	return githandler.CheckOut(br)
 }
 
+//MergeFFO ...
 func (g *GitStrategy) MergeFF(br string) error {
 	return githandler.MergeFFO(br)
 }
 
+//RebaseOnto ...
 func (g *GitStrategy) RebaseOnto(br string) error {
 	return githandler.RebaseOnto(br)
 }
@@ -51,40 +55,40 @@ func main() {
 	var request models.InRequest
 
 	err = json.NewDecoder(os.Stdin).Decode(&request)
-	repo.Check(err, "OS in parsing errored")
+	repo.Check(err, "failed parsing json in in-request")
 
 	repo.CloneRepoSource(request.Source.URL, destination, request.Source.Username, request.Source.Password)
 
 	err = os.Chdir(destination)
 	repo.Check(err, "could not change dir")
 
-	//Check if sha from in is the same as master sha
-	//git branch master --contains <commit>
+	RunPhlow(&request)
+}
+
+//RunPhlow ...
+//Runs the phlow workflow
+func RunPhlow(request *models.InRequest) {
+
+	//Verify if the commit from IN is already on master
 	cco, err := githandler.ContainsCommit(request.Source.Master, request.Version.Sha)
-	fmt.Fprintln(os.Stderr, "cco: "+cco)
 	if strings.TrimSpace(cco) != "" {
-		//Exists on master
 		fmt.Fprintln(os.Stderr, "Found sha on master, no need for integration")
 		repo.WriteRDYBranch("")
-		SendMetadata(request.Version.Sha)
+		concourse.SendMetadata(request.Version.Sha)
 		os.Exit(0)
 	}
 
-	//list all branches
-	out := githandler.BranchList()
-	fmt.Fprintln(os.Stderr, out)
+	fmt.Fprintln(os.Stderr, githandler.BranchList())
 
 	//retrieve the next ready branch from origin with prefix
 	rbn := phlow.UpNext("origin", request.Source.PrefixReady)
-	fmt.Fprintln(os.Stderr, "Ready branch found: "+rbn)
 	if rbn == "" {
-		fmt.Fprintf(os.Stderr, "no branches with: %s available for integration with: %s \n", request.Source.PrefixReady, request.Source.Master)
-		fmt.Fprintln(os.Stderr, "Exiting build")
+		fmt.Fprintf(os.Stderr, "no branches with: %s available for integration with: %s .. Exiting\n", request.Source.PrefixReady, request.Source.Master)
 		repo.WriteRDYBranch("") //write an empty name
-
-		SendMetadata(request.Version.Sha)
+		concourse.SendMetadata(request.Version.Sha)
 		os.Exit(0)
 	}
+	fmt.Fprintf(os.Stderr, "Target branch: %s", rbn)
 
 	//Checkout ready branch to get a local copy
 	if err = githandler.CheckOut(rbn); err != nil {
@@ -99,31 +103,23 @@ func main() {
 	}
 
 	//Names the branch to the name plus wip prefix
-	wipBranchName := request.Source.PrefixWip + strings.TrimPrefix(rbn, request.Source.PrefixReady)
-	u := repo.FormatURL(request.Source.URL, request.Source.Username, request.Source.Password)
-	fmt.Fprintln(os.Stderr, "wip branch: "+wipBranchName)
-	fmt.Fprintln(os.Stderr, "ready branch: "+rbn)
-	repo.RenameRemoteBranch(u, wipBranchName, rbn)
+	wbn := request.Source.PrefixWip + strings.TrimPrefix(rbn, request.Source.PrefixReady)
+	url := repo.FormatURL(request.Source.URL, request.Source.Username, request.Source.Password)
+	repo.RenameRemoteBranch(url, wbn, rbn)
 
 	strategy := GitStrategy{}
 	err = ApplyAndRunStrategy(request.Source.Master, rbn, &strategy)
 	if err != nil {
-		err := githandler.CheckOut(wipBranchName)
-		fmt.Fprintln(os.Stderr, err)
-
-		repo.RenameRemoteBranch(u, "failed/"+rbn, wipBranchName)
 		fmt.Fprintln(os.Stderr, "Merge failed, Aborting integration")
 		os.Exit(1)
 	}
 
-	repo.WriteRDYBranch(wipBranchName)
-	fmt.Fprintf(os.Stderr, "saving wip branch name: %s to dest: %s for use in out", wipBranchName, ".git/git-phlow-ready-branch")
-	SendMetadata(request.Version.Sha)
+	repo.WriteRDYBranch(wbn)
+	concourse.SendMetadata(request.Version.Sha)
 }
 
-//ApplyStrategy
-// 0 - ff-only merge
-// 1 - try rebase
+//ApplyAndRunStrategy ...
+//Run phlow pretested-integration strategy
 func ApplyAndRunStrategy(master string, ready string, s Strategy) (err error) {
 
 	var rb = func() error {
@@ -132,7 +128,7 @@ func ApplyAndRunStrategy(master string, ready string, s Strategy) (err error) {
 			fmt.Fprintf(os.Stderr, "could not checkout %s \n", ready)
 			return err
 		}
-
+		//rebase
 		if err := s.RebaseOnto(master); err != nil {
 			fmt.Fprintln(os.Stderr, "not able to rebase")
 			fmt.Fprintln(os.Stderr, err)
@@ -155,6 +151,7 @@ func ApplyAndRunStrategy(master string, ready string, s Strategy) (err error) {
 	}
 
 	if err = ff(); err == nil {
+		//First try ff-merge
 		fmt.Fprintln(os.Stderr, "fast-forward success")
 		return nil
 	} else {
@@ -170,26 +167,4 @@ func ApplyAndRunStrategy(master string, ready string, s Strategy) (err error) {
 			return nil
 		}
 	}
-}
-
-//GetMetadata ...
-//sends the metadata to output
-func SendMetadata(sha string) {
-	ref, _ := githandler.CommitSha()
-	author, _ := githandler.Author()
-	date, _ := githandler.AuthorDate()
-
-	str, err := json.Marshal(models.InResponse{
-		Version: models.Version{Sha: sha},
-		MetaData: models.Metadata{
-			{"commit", ref},
-			{"author", author},
-			{"authordate", date},
-		},
-	})
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-	}
-	fmt.Fprint(os.Stdout, string(str))
-	//json.NewEncoder(os.Stdout).Encode()
 }

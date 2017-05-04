@@ -12,6 +12,7 @@ import (
 	"github.com/praqma/concourse-git-phlow/githandler"
 	"github.com/praqma/concourse-git-phlow/models"
 	"github.com/praqma/concourse-git-phlow/repo"
+	"github.com/praqma/concourse-git-phlow/concourse"
 )
 
 func main() {
@@ -24,14 +25,12 @@ func main() {
 
 	var request models.OutRequest
 
-	err := json.NewDecoder(os.Stdin).Decode(&request)
-	if err != nil {
+	if err := json.NewDecoder(os.Stdin).Decode(&request); err != nil {
 		fmt.Fprintln(os.Stderr, "OS in parsing errored")
 		os.Exit(1)
 	}
 
-	err = os.Chdir(destination + "/" + request.Params.Repository)
-	if err != nil {
+	if err := os.Chdir(destination + "/" + request.Params.Repository); err != nil {
 		fmt.Fprintln(os.Stderr, "could not change dir:", err.Error())
 		os.Exit(1)
 	}
@@ -39,12 +38,10 @@ func main() {
 	name, err := ioutil.ReadFile(".git/git-phlow-ready-branch")
 	repo.Check(err, "failed reading branch name from file")
 
-	fmt.Fprintln(os.Stderr, string(name))
-
 	if string(name) == "" || !BranchExistsOnOrigin(string(name)) {
 		fmt.Fprintln(os.Stderr, "No ready branch to integrate with master.. Exiting build")
 		ref, _ := githandler.CommitSha()
-		SendMetadata(ref)
+		concourse.SendMetadata(ref)
 		os.Exit(0)
 	}
 
@@ -55,9 +52,9 @@ func main() {
 		fmt.Fprintln(os.Stderr, "branch could not be deleted")
 		os.Exit(1)
 	}
-
+	fmt.Fprintf(os.Stderr, "%s has been pushed to %s", string(name), request.Source.Master)
 	ref, _ := githandler.CommitSha()
-	SendMetadata(ref)
+	concourse.SendMetadata(ref)
 }
 
 //BranchExistsOnOrigin ...
@@ -80,22 +77,6 @@ func BranchExistsOnOrigin(branchName string) (exists bool) {
 		}
 	}
 	return false
-}
-
-//SendMetadata ...
-func SendMetadata(sha string) {
-	ref, _ := githandler.CommitSha()
-	author, _ := githandler.Author()
-	date, _ := githandler.AuthorDate()
-
-	json.NewEncoder(os.Stdout).Encode(models.InResponse{
-		Version: models.Version{Sha: sha},
-		MetaData: models.Metadata{
-			{"commit", ref},
-			{"author", author},
-			{"authordate", date},
-		},
-	})
 }
 
 func HttpsPush(URL string, username, password string) {
