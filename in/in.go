@@ -99,7 +99,7 @@ func main() {
 	}
 
 	//Names the branch to the name plus wip prefix
-	wipBranchName := request.Source.PrefixWip + rbn
+	wipBranchName := request.Source.PrefixWip + strings.TrimPrefix(rbn, request.Source.PrefixReady)
 	u := repo.FormatURL(request.Source.URL, request.Source.Username, request.Source.Password)
 	fmt.Fprintln(os.Stderr, "wip branch: "+wipBranchName)
 	fmt.Fprintln(os.Stderr, "ready branch: "+rbn)
