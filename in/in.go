@@ -144,7 +144,7 @@ func ApplyAndRunStrategy(master string, ready string, s Strategy) (err error) {
 			return err
 		}
 		if err := s.MergeFF(ready); err != nil {
-			fmt.Fprintln(os.Stderr, "not able to fast forward")
+			fmt.Fprintln(os.Stderr, " not able to fast forward")
 			return err
 		}
 		return nil

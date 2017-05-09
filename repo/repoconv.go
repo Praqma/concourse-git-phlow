@@ -14,7 +14,7 @@ import (
 func WriteRDYBranch(name string) {
 	err := ioutil.WriteFile(".git/git-phlow-ready-branch", []byte(name), 0655)
 	if err != nil {
-		fmt.Fprintln(os.Stderr,"Could not file for ready branch")
+		fmt.Fprintln(os.Stderr,"Could not write file for ready branch")
 		os.Exit(1)
 	}
 }
@@ -24,7 +24,7 @@ func WriteRDYBranch(name string) {
 func RenameRemoteBranch(URL, newName, oldName string) {
 	err := githandler.PushRenameHTTPS(URL, newName, oldName)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "could not push rename old: %s new: %s", oldName, newName)
+		fmt.Fprintf(os.Stderr, "Could not push rename old: %s new: %s", oldName, newName)
 		os.Exit(1)
 	}
 
@@ -47,10 +47,10 @@ func FormatURL(URL, username, password string) string {
 //clones the repository
 func CloneRepoSource(URL, path, username, password string) {
 	c := FormatURL(URL, username, password)
-	fmt.Fprintf(os.Stderr, "Cloning into desitnation: %s from:  %s\n", path, URL)
+	fmt.Fprintf(os.Stderr, "Cloning into destination: %s from:  %s\n", path, URL)
 	_, err := githandler.Clone(c, path)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "could not get repo from: %s", URL)
+		fmt.Fprintf(os.Stderr, "Could not get repo from: %s", URL)
 		os.Exit(1)
 	}
 }
