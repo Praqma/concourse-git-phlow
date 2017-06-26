@@ -23,7 +23,7 @@ resource_types:
  type: docker-image
  source:
    repository: groenborg/concourse-git-phlow
-   tag: '1.0.0'
+   tag: '1.0.10'
 ```
 
 Note: versions below 0.2.31 are not finished and were used during development. 
