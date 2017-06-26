@@ -1,13 +1,13 @@
 #!/bin/sh
 set -e -u -x
 
-cat gp-version/version
+cat cgp-version/version
 
 mkdir -p $GOPATH/src/github.com/praqma
-cp -R concourse-git-phlow/ $GOPATH/src/github.com/praqma
+cp -R tollgate/ $GOPATH/src/github.com/praqma
 
 # RESOLVE DEPENDENCIES - TEST AND PRODUCTION
-cd $GOPATH/src/github.com/praqma/concourse-git-phlow
+cd $GOPATH/src/github.com/praqma/tollgate
 
 go get github.com/tools/godep
 godep restore

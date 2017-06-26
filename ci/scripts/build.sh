@@ -3,7 +3,7 @@ set -e -u -x
 
 C_PATH=$(pwd)
 
-VERSION=$(cat gp-version/version)
+VERSION=$(cat cgp-version/version)
 
 mkdir -p $GOPATH/src/github.com/praqma
 cp -R concourse-git-phlow/ $GOPATH/src/github.com/praqma
