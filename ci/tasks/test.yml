@@ -8,5 +8,6 @@ image_resource:
 inputs:
 - name: tollgate
 - name: concourse-git-phlow
+- name: cgp-version
 run:
   path: tollgate/ci/scripts/test.sh

@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e -u -x
 
+cat gp-version/version
+
 mkdir -p $GOPATH/src/github.com/praqma
 cp -R concourse-git-phlow/ $GOPATH/src/github.com/praqma
 

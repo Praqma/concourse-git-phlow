@@ -7,6 +7,7 @@ image_resource:
 
 inputs:
 - name: concourse-git-phlow
+- name: cgp-version
 
 outputs:
 - name: concourse-git-phlow-artifacts
