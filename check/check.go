@@ -9,16 +9,26 @@ import (
 	"github.com/praqma/concourse-git-phlow/models"
 	"github.com/praqma/concourse-git-phlow/repo"
 	"github.com/praqma/git-phlow/phlow"
+	"log"
 )
+
 
 func main() {
 	var request models.CheckRequest
 	var ref string
-	destination := os.Getenv("TMPDIR") + "/cache"
+	cacheDir := "/cache"
+
+
+	destination := os.Getenv("TMPDIR")
+	if destination == "" {
+		log.Panicln("TMPDIR Missing: ",destination)
+	}
+
+	destination = destination + cacheDir
 
 	err := json.NewDecoder(os.Stdin).Decode(&request)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "could not parse input in check")
+		log.Panicln("Unable to parse json input",err)
 		os.Exit(1)
 	}
 

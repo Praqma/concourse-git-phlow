@@ -68,7 +68,7 @@ jobs:
     trigger: true
   - get: concourse-git-phlow
   - task: run-test
-    file: concourse-git-phlow/ci/tasks/test.yml
+    file: tollgate/ci/tasks/test.yml
     on_failure:
       put: slack-alert
       params:

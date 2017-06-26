@@ -9,4 +9,4 @@ inputs:
 - name: tollgate
 - name: concourse-git-phlow
 run:
-  path: concourse-git-phlow/ci/scripts/test.sh
+  path: tollgate/ci/scripts/test.sh
