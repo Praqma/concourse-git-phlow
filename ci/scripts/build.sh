@@ -3,6 +3,8 @@ set -e -u -x
 
 C_PATH=$(pwd)
 
+VERSION=$(cat gp-version/version)
+
 mkdir -p $GOPATH/src/github.com/praqma
 cp -R concourse-git-phlow/ $GOPATH/src/github.com/praqma
 
@@ -14,9 +16,10 @@ godep restore
 export GOOS=linux
 export GOARCH=amd64
 
-godep go build -o $C_PATH/concourse-git-phlow/assets/check check/check.go
-godep go build -o $C_PATH/concourse-git-phlow/assets/in in/in.go
-godep go build -o $C_PATH/concourse-git-phlow/assets/out out/out.go
+
+godep go build  -ldflags "-X github.com/praqma/concourse-git-phlow/repo.Version=`echo $VERSION`" -o assets/check check/check.go
+godep go build -ldflags "-X github.com/praqma/concourse-git-phlow/repo.Version=`echo $VERSION`" -o assets/in in/in.go
+godep go build -ldflags "-X github.com/praqma/concourse-git-phlow/repo.Version=`echo $VERSION`" -o assets/out out/out.go
 
 chmod +x $C_PATH/concourse-git-phlow/assets/check
 chmod +x $C_PATH/concourse-git-phlow/assets/in

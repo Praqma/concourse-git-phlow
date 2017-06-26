@@ -15,8 +15,6 @@ import (
 	"log"
 )
 
-var Version = "1"
-
 //Strategy ...
 type Strategy interface {
 	Checkout(string) error
@@ -64,8 +62,9 @@ func main() {
 		log.Panicln(err)
 	}
 
-	fmt.Fprintln(os.Stderr, "VERSION ", Version)
-	//SHOULD BE PULL OR FETCH
+	fmt.Fprintln(os.Stderr, "Resource Version " + repo.Version)
+
+
 	repo.CloneRepoSource(request.Source.URL, destination, request.Source.Username, request.Source.Password)
 
 	err = os.Chdir(destination)

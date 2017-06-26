@@ -12,12 +12,10 @@ import (
 	"log"
 )
 
-
 func main() {
 	var request models.CheckRequest
 	var ref string
 	cacheDir := "/cache"
-
 
 	destination := os.Getenv("TMPDIR")
 	if destination == "" {

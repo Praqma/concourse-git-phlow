@@ -67,6 +67,9 @@ jobs:
   - get: tollgate
     trigger: true
   - get: concourse-git-phlow
+  - get: cgp-version
+  - put: cgp-version
+    params: {bump: patch}
   - task: run-test
     file: tollgate/ci/tasks/test.yml
     on_failure:
@@ -88,8 +91,6 @@ jobs:
   - get: docker-image-builder
   - task: build-assets
     file: concourse-git-phlow/ci/tasks/build.yml
-  - put: cgp-version
-    params: {bump: patch}
   - put: docker-image-builder
     params:
         build: concourse-git-phlow-artifacts

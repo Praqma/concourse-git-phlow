@@ -30,7 +30,7 @@ func main() {
 		log.Panicln(err)
 	}
 
-	fmt.Fprintln(os.Stderr, "VERSION ", "1")
+	fmt.Fprintln(os.Stderr, "Resource Version "+repo.Version)
 
 	if err := os.Chdir(destination + "/" + request.Params.Repository); err != nil {
 		log.Panicln(err, destination)
