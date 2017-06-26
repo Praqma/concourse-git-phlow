@@ -55,9 +55,8 @@ func RevParse() (out string, err error) {
 }
 
 //BranchList ...
-func BranchList() string {
-	out, _ := executor.ExecuteCommand("git", "branch", "-av")
-	return out
+func BranchList() (string, error) {
+	return executor.ExecuteCommand("git", "branch", "-av")
 }
 
 //Fetch ...

@@ -13,6 +13,7 @@ import (
 	"github.com/praqma/concourse-git-phlow/models"
 	"github.com/praqma/concourse-git-phlow/repo"
 	"github.com/praqma/concourse-git-phlow/concourse"
+	"log"
 )
 
 func main() {
@@ -26,20 +27,23 @@ func main() {
 	var request models.OutRequest
 
 	if err := json.NewDecoder(os.Stdin).Decode(&request); err != nil {
-		fmt.Fprintln(os.Stderr, "OS in parsing errored")
-		os.Exit(1)
+		log.Panicln(err)
 	}
 
+	fmt.Fprintln(os.Stderr, "VERSION ", "1")
+
 	if err := os.Chdir(destination + "/" + request.Params.Repository); err != nil {
-		fmt.Fprintln(os.Stderr, "could not change dir:", err.Error())
-		os.Exit(1)
+		log.Panicln(err, destination)
 	}
 
 	name, err := ioutil.ReadFile(".git/git-phlow-ready-branch")
-	repo.Check(err, "failed reading branch name from file")
+	if err != nil {
+		log.Panicln(err, name)
+	}
 
 	if string(name) == "" || !BranchExistsOnOrigin(string(name)) {
 		fmt.Fprintln(os.Stderr, "No ready branch to integrate with master.. Exiting build")
+		fmt.Fprintln(os.Stderr, "Output")
 		ref, _ := githandler.CommitSha()
 		concourse.SendMetadata(ref)
 		os.Exit(0)
@@ -49,10 +53,10 @@ func main() {
 
 	err = githandler.PushDeleteHTTPS("origin", string(name))
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "branch could not be deleted")
-		os.Exit(1)
+		log.Panicln(err, "branch could not be deleted")
+
 	}
-	fmt.Fprintf(os.Stderr, "%s has been pushed to %s", string(name), request.Source.Master)
+	fmt.Fprintf(os.Stderr, "%s has been pushed to %s", string(name), request.Source.MainBranch)
 	ref, _ := githandler.CommitSha()
 	concourse.SendMetadata(ref)
 }
@@ -60,9 +64,16 @@ func main() {
 //BranchExistsOnOrigin ...
 func BranchExistsOnOrigin(branchName string) (exists bool) {
 	branchName = strings.TrimSpace(branchName)
-	githandler.Fetch()
 
-	brOut := githandler.BranchList()
+	if err := githandler.Fetch(); err != nil {
+		log.Panicln(err)
+	}
+
+	brOut, err := githandler.BranchList()
+	if err != nil {
+		log.Panicln(err)
+	}
+
 	var list []string
 	for _, branch := range strings.Split(brOut, "\n") {
 		if branch != "" {
@@ -86,8 +97,7 @@ func HttpsPush(URL string, username, password string) {
 	fmt.Fprintf(os.Stderr, "pushing to: %s \n", URL)
 	_, err := githandler.PushHTTPS(url)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "could not push to repository")
-		os.Exit(1)
+		log.Panicln(err, URL)
 	}
 }
 

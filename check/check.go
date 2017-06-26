@@ -51,11 +51,14 @@ func main() {
 //getRef ...
 //returns the ref of the ready branch
 func getRef(basePath string, request models.CheckRequest) (ref string) {
-	os.Chdir(basePath)
+
+	chErr := os.Chdir(basePath)
+	if chErr != nil {
+		log.Panicln("no basepath", basePath, chErr)
+	}
 
 	if err := githandler.Fetch(); err != nil {
-		fmt.Fprintln(os.Stderr, "could not fetch from remote: ", err.Error())
-		os.Exit(1)
+		log.Panicln("could not fetch from remote: ", err.Error())
 	}
 
 	branchName := phlow.UpNext("origin", request.Source.PrefixReady)
@@ -83,7 +86,7 @@ func getRef(basePath string, request models.CheckRequest) (ref string) {
 		os.Exit(1)
 	}
 
-	err = githandler.CheckOut(request.Source.Master)
+	err = githandler.CheckOut(request.Source.MainBranch)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "could not checkout main branch:", err.Error())
 		os.Exit(1)

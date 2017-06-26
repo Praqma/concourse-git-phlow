@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/praqma/concourse-git-phlow/githandler"
+	"log"
 )
 
 //WriteRDYBranch ...
@@ -14,8 +15,7 @@ import (
 func WriteRDYBranch(name string) {
 	err := ioutil.WriteFile(".git/git-phlow-ready-branch", []byte(name), 0655)
 	if err != nil {
-		fmt.Fprintln(os.Stderr,"Could not write file for ready branch")
-		os.Exit(1)
+		log.Panicln(err)
 	}
 }
 
@@ -24,14 +24,12 @@ func WriteRDYBranch(name string) {
 func RenameRemoteBranch(URL, newName, oldName string) {
 	err := githandler.PushRenameHTTPS(URL, newName, oldName)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Could not push rename old: %s new: %s", oldName, newName)
-		os.Exit(1)
+		log.Panicf("Could not push rename old: %s new: %s", oldName, newName)
 	}
 
 	err = githandler.PushDeleteHTTPS("origin", oldName)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Could not push delete branch %s \n", oldName)
-		os.Exit(1)
+		log.Panicf("Could not push delete branch %s \n", oldName)
 	}
 }
 
@@ -48,16 +46,9 @@ func FormatURL(URL, username, password string) string {
 func CloneRepoSource(URL, path, username, password string) {
 	c := FormatURL(URL, username, password)
 	fmt.Fprintf(os.Stderr, "Cloning into destination: %s from:  %s\n", path, URL)
+
 	_, err := githandler.Clone(c, path)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Could not get repo from: %s", URL)
-		os.Exit(1)
-	}
-}
-
-func Check(e error, str string) {
-	if e != nil {
-		fmt.Fprintln(os.Stderr, str)
-		os.Exit(1)
+		log.Panicln(URL, path, err)
 	}
 }
