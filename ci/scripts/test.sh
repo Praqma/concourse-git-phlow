@@ -7,7 +7,7 @@ mkdir -p $GOPATH/src/github.com/praqma
 cp -R tollgate/ $GOPATH/src/github.com/praqma
 
 # RESOLVE DEPENDENCIES - TEST AND PRODUCTION
-cd $GOPATH/src/github.com/praqma/tollgate
+cd $GOPATH/src/github.com/praqma/concourse-git-phlow
 
 go get github.com/tools/godep
 godep restore
