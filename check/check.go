@@ -19,14 +19,14 @@ func main() {
 
 	destination := os.Getenv("TMPDIR")
 	if destination == "" {
-		log.Panicln("TMPDIR Missing: ",destination)
+		log.Panicln("TMPDIR Missing: ", destination)
 	}
 
 	destination = destination + cacheDir
 
 	err := json.NewDecoder(os.Stdin).Decode(&request)
 	if err != nil {
-		log.Panicln("Unable to parse json input",err)
+		log.Panicln("Unable to parse json input", err)
 		os.Exit(1)
 	}
 
@@ -55,8 +55,16 @@ func getRef(basePath string, request models.CheckRequest) (ref string) {
 		log.Panicln("no basepath", basePath, chErr)
 	}
 
-	if err := githandler.Fetch(); err != nil {
-		log.Panicln("could not fetch from remote: ", err.Error())
+	if err := githandler.HardReset(); err != nil {
+		log.Panicln(err)
+	}
+
+	if err := githandler.Pull(); err != nil {
+		log.Panicln("could not pull from remote: ", err)
+	}
+
+	if err := githandler.FetchPrune(); err != nil {
+		log.Panicln("could not fetch from remote: ", err)
 	}
 
 	branchName := phlow.UpNext("origin", request.Source.PrefixReady)
@@ -75,19 +83,17 @@ func getRef(basePath string, request models.CheckRequest) (ref string) {
 
 	err := githandler.CheckOut(branchName)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "checkout failed: ", err.Error())
-		os.Exit(1)
+		log.Panicln(err)
 	}
 
 	if ref, err = githandler.RevParse(); err != nil {
-		fmt.Fprintln(os.Stderr, "could not retrieve ref: ", err.Error())
-		os.Exit(1)
+		log.Panicln(err)
 	}
 
 	err = githandler.CheckOut(request.Source.MainBranch)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "could not checkout main branch:", err.Error())
-		os.Exit(1)
+		log.Panicln(err)
+
 	}
 	return ref
 }

@@ -65,7 +65,7 @@ func main() {
 func BranchExistsOnOrigin(branchName string) (exists bool) {
 	branchName = strings.TrimSpace(branchName)
 
-	if err := githandler.Fetch(); err != nil {
+	if err := githandler.FetchPrune(); err != nil {
 		log.Panicln(err)
 	}
 

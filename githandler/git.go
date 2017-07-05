@@ -20,6 +20,12 @@ func RebaseOnto(br string) (err error) {
 	return
 }
 
+//Pull
+func Pull() error {
+	_, err := executor.ExecuteCommand("git", "pull")
+	return err
+}
+
 //MergeFFO ...
 //Only merge if it is a fast forward
 func MergeFFO(branch string) (err error) {
@@ -39,6 +45,7 @@ func CheckOut(branch string) error {
 	return err
 }
 
+//HardReset ...
 func HardReset() error {
 	_, err := executor.ExecuteCommand("git", "reset", "--hard")
 	return err
@@ -59,9 +66,9 @@ func BranchList() (string, error) {
 	return executor.ExecuteCommand("git", "branch", "-av")
 }
 
-//Fetch ...
-func Fetch() error {
-	_, err := executor.ExecuteCommand("git", "fetch", "--prune")
+//FetchPrune ...
+func FetchPrune() error {
+	_, err := executor.ExecuteCommand("git", "fetch", "--all", "--prune")
 	return err
 }
 
