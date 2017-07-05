@@ -12,9 +12,11 @@ import (
 	"github.com/praqma/concourse-git-phlow/githandler"
 	"github.com/praqma/concourse-git-phlow/models"
 	"github.com/praqma/concourse-git-phlow/repo"
-	"github.com/praqma/concourse-git-phlow/concourse"
+	"github.com/praqma/concourse-git-phlow/mwriter"
 	"log"
 )
+
+var Cerberus *mwriter.DataDog
 
 func main() {
 	if len(os.Args) < 2 {
@@ -30,6 +32,8 @@ func main() {
 		log.Panicln(err)
 	}
 
+	Cerberus = mwriter.SpawnCerberus(request.Source)
+
 	fmt.Fprintln(os.Stderr, "Resource Version "+repo.Version)
 
 	if err := os.Chdir(destination + "/" + request.Params.Repository); err != nil {
@@ -38,6 +42,7 @@ func main() {
 
 	name, err := ioutil.ReadFile(".git/git-phlow-ready-branch")
 	if err != nil {
+		Cerberus.BarkEvent(err.Error(), mwriter.Error)
 		log.Panicln(err, name)
 	}
 
@@ -45,7 +50,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, "No ready branch to integrate with master.. Exiting build")
 		fmt.Fprintln(os.Stderr, "Output")
 		ref, _ := githandler.CommitSha()
-		concourse.SendMetadata(ref)
+		mwriter.SendMetadata(ref)
 		os.Exit(0)
 	}
 
@@ -53,12 +58,13 @@ func main() {
 
 	err = githandler.PushDeleteHTTPS("origin", string(name))
 	if err != nil {
+		Cerberus.BarkEvent(err.Error(), mwriter.Error)
 		log.Panicln(err, "branch could not be deleted")
 
 	}
 	fmt.Fprintf(os.Stderr, "%s has been pushed to %s", string(name), request.Source.MainBranch)
 	ref, _ := githandler.CommitSha()
-	concourse.SendMetadata(ref)
+	mwriter.SendMetadata(ref)
 }
 
 //BranchExistsOnOrigin ...
@@ -66,11 +72,13 @@ func BranchExistsOnOrigin(branchName string) (exists bool) {
 	branchName = strings.TrimSpace(branchName)
 
 	if err := githandler.FetchPrune(); err != nil {
+		Cerberus.BarkEvent(err.Error(), mwriter.Error)
 		log.Panicln(err)
 	}
 
 	brOut, err := githandler.BranchList()
 	if err != nil {
+		Cerberus.BarkEvent(err.Error(), mwriter.Error)
 		log.Panicln(err)
 	}
 
@@ -97,6 +105,7 @@ func HttpsPush(URL string, username, password string) {
 	fmt.Fprintf(os.Stderr, "pushing to: %s \n", URL)
 	_, err := githandler.PushHTTPS(url)
 	if err != nil {
+		Cerberus.BarkEvent(err.Error(), mwriter.Error)
 		log.Panicln(err, URL)
 	}
 }

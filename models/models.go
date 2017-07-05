@@ -45,16 +45,19 @@ type OutParams struct {
 //Source ...
 //configuration object for all steps
 type Source struct {
-	URL         string `json:"url"`
-	MainBranch  string `json:"master"`
-	PrefixReady string `json:"prefixready"`
-	PrefixWip   string `json:"prefixwip"`
-	Username    string `json:"username"`
-	Password    string `json:"password"`
+	URL               string `json:"url"`
+	MainBranch        string `json:"master"`
+	PrefixReady       string `json:"prefixready"`
+	PrefixWip         string `json:"prefixwip"`
+	Username          string `json:"username"`
+	Password          string `json:"password"`
+	DataDogApiKey     string `json:"datadog_api_key"`
+	DataDogAppKey     string `json:"datadog_app_key"`
+	DataDogMetricName string `json:"metric_name"`
 }
 
 //Version ...
-//it is the data concourse uses for registering changes
+//it is the data mwriter uses for registering changes
 //which is new sha' in our resource
 type Version struct {
 	Sha string `json:"sha"`

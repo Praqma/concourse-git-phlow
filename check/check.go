@@ -10,6 +10,7 @@ import (
 	"github.com/praqma/concourse-git-phlow/repo"
 	"github.com/praqma/git-phlow/phlow"
 	"log"
+	"github.com/praqma/concourse-git-phlow/mwriter"
 )
 
 func main() {
@@ -30,6 +31,9 @@ func main() {
 		os.Exit(1)
 	}
 
+	cerberus := mwriter.SpawnCerberus(request.Source)
+	cerberus.WufMetric()
+
 	//validating if the repository is cached
 	if doesExist(destination) {
 		ref = getRef(destination, request)
@@ -49,6 +53,7 @@ func main() {
 //getRef ...
 //returns the ref of the ready branch
 func getRef(basePath string, request models.CheckRequest) (ref string) {
+	cerberus := mwriter.SpawnCerberus(request.Source)
 
 	chErr := os.Chdir(basePath)
 	if chErr != nil {
@@ -74,12 +79,12 @@ func getRef(basePath string, request models.CheckRequest) (ref string) {
 		if request.Version.Sha != "" {
 			return request.Version.Sha
 		}
-
 		//First build with no ready branches
 		fmt.Fprintln(os.Stderr, "Create ready branch for this error to go away")
 		os.Exit(1)
-
 	}
+
+	cerberus.BarkEvent("Integration branch found: "+branchName, mwriter.Info)
 
 	err := githandler.CheckOut(branchName)
 	if err != nil {

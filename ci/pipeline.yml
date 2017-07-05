@@ -3,7 +3,7 @@ resource_types:
 - name: pip
   type: docker-image
   source:
-    repository: groenborg/concourse-git-phlow
+    repository: groenborg/mwriter-git-phlow
     tag: '1.0.10'
 
 #SLACK RESOURCE TYPE
@@ -22,16 +22,16 @@ resources:
     prefixready: ready/
     prefixwip: wip/
     master: master
-    url: https://github.com/Praqma/concourse-git-phlow.git
+    url: https://github.com/Praqma/mwriter-git-phlow.git
     username: {{github-username}}
     password: {{github-password}}
 
 #IMPORT THE BASE GIT RESOURCE SO WE ALWAYS HAVE THE BUILD FROM MASTER
 #DEPENDING ON THE TASK, ONLY CGP IS NECESSARY
-- name: concourse-git-phlow
+- name: mwriter-git-phlow
   type: git
   source:
-    uri: https://github.com/Praqma/concourse-git-phlow.git
+    uri: https://github.com/Praqma/mwriter-git-phlow.git
     branch: master
     username: {{github-username}}
     password: {{github-password}}
@@ -40,7 +40,7 @@ resources:
   type: semver
   source:
     driver: git
-    uri: git@github.com:Praqma/concourse-git-phlow.git
+    uri: git@github.com:Praqma/mwriter-git-phlow.git
     private_key: {{github-private-key}} 
     branch: version
     file: version
@@ -48,7 +48,7 @@ resources:
 - name: docker-image-builder
   type: docker-image
   source:
-    repository: groenborg/concourse-git-phlow
+    repository: groenborg/mwriter-git-phlow
     username: {{docker-username}}
     password: {{docker-password}}
   
@@ -66,7 +66,7 @@ jobs:
   plan:
   - get: tollgate
     trigger: true
-  - get: concourse-git-phlow
+  - get: mwriter-git-phlow
   - get: cgp-version
   - put: cgp-version
     params: {bump: patch}
@@ -84,16 +84,16 @@ jobs:
      
 - name: build-docker-image
   plan:
-  - get: concourse-git-phlow
+  - get: mwriter-git-phlow
     passed: [unit-test-run]
     trigger: true
   - get: cgp-version
   - get: docker-image-builder
   - task: build-assets
-    file: concourse-git-phlow/ci/tasks/build.yml
+    file: mwriter-git-phlow/ci/tasks/build.yml
   - put: docker-image-builder
     params:
-        build: concourse-git-phlow-artifacts
+        build: mwriter-git-phlow-artifacts
         tag: cgp-version/version
         tag_as_latest: true
     

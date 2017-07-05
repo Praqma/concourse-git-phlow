@@ -11,9 +11,11 @@ import (
 	"github.com/praqma/concourse-git-phlow/repo"
 	"github.com/praqma/git-phlow/phlow"
 	"strings"
-	"github.com/praqma/concourse-git-phlow/concourse"
+	"github.com/praqma/concourse-git-phlow/mwriter"
 	"log"
 )
+
+var Cerberus *mwriter.DataDog
 
 //Strategy ...
 type Strategy interface {
@@ -62,13 +64,15 @@ func main() {
 		log.Panicln(err)
 	}
 
-	fmt.Fprintln(os.Stderr, "Resource Version " + repo.Version)
+	Cerberus = mwriter.SpawnCerberus(request.Source)
 
+	fmt.Fprintln(os.Stderr, "Resource Version "+repo.Version)
 
 	repo.CloneRepoSource(request.Source.URL, destination, request.Source.Username, request.Source.Password)
 
 	err = os.Chdir(destination)
 	if err != nil {
+		Cerberus.BarkEvent(err.Error(), mwriter.Error)
 		log.Panicln(err)
 	}
 
@@ -82,6 +86,7 @@ func RunPhlow(request *models.InRequest) {
 	//Verify if the commit from IN is already on master
 	cco, err := githandler.ContainsCommit(request.Source.MainBranch, request.Version.Sha)
 	if err != nil {
+		Cerberus.BarkEvent(err.Error(), mwriter.Error)
 		log.Panicln(err)
 	}
 
@@ -89,12 +94,13 @@ func RunPhlow(request *models.InRequest) {
 		fmt.Fprintln(os.Stderr, "Found sha on master, no need for integration")
 		fmt.Fprintln(os.Stderr, cco)
 		repo.WriteRDYBranch("")
-		concourse.SendMetadata(request.Version.Sha)
+		mwriter.SendMetadata(request.Version.Sha)
 		os.Exit(0)
 	}
 
 	gitBranches, err := githandler.BranchList()
 	if err != nil {
+		Cerberus.BarkEvent(err.Error(), mwriter.Error)
 		log.Panicln(err)
 	}
 	fmt.Fprintln(os.Stderr, gitBranches)
@@ -104,18 +110,20 @@ func RunPhlow(request *models.InRequest) {
 	if rbn == "" {
 		fmt.Fprintf(os.Stderr, "no branches with: %s available for integration with: %s .. Exiting\n", request.Source.PrefixReady, request.Source.MainBranch)
 		repo.WriteRDYBranch("") //write an empty name
-		concourse.SendMetadata(request.Version.Sha)
+		mwriter.SendMetadata(request.Version.Sha)
 		os.Exit(0)
 	}
 	fmt.Fprintf(os.Stderr, "Target branch: %s", rbn)
 
 	//Checkout ready branch to get a local copy
 	if err = githandler.CheckOut(rbn); err != nil {
+		Cerberus.BarkEvent(err.Error(), mwriter.Error)
 		log.Panicln(err)
 	}
 
 	//Checkout master
 	if err = githandler.CheckOut(request.Source.MainBranch); err != nil {
+		Cerberus.BarkEvent(err.Error(), mwriter.Error)
 		log.Panicln(err)
 	}
 
@@ -126,13 +134,14 @@ func RunPhlow(request *models.InRequest) {
 
 	strategy := GitStrategy{}
 	err = ApplyAndRunStrategy(request.Source.MainBranch, rbn, &strategy)
+
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Merge failed, Aborting integration")
 		os.Exit(1)
 	}
 
 	repo.WriteRDYBranch(wbn)
-	concourse.SendMetadata(request.Version.Sha)
+	mwriter.SendMetadata(request.Version.Sha)
 }
 
 //ApplyAndRunStrategy ...

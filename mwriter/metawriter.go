@@ -1,4 +1,4 @@
-package concourse
+package mwriter
 
 import (
 	"encoding/json"
