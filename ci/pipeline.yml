@@ -4,7 +4,7 @@ resource_types:
   type: docker-image
   source:
     repository: groenborg/concourse-git-phlow
-    tag: '1.0.12'
+    tag: '1.0.18'
 
 #SLACK RESOURCE TYPE
 - name: slack-notification
@@ -69,7 +69,6 @@ jobs:
   plan:
   - get: tollgate
     trigger: true
-  - get: concourse-git-phlow
   - get: cgp-version
   - put: cgp-version
     params: {bump: patch}
@@ -87,9 +86,10 @@ jobs:
      
 - name: build-docker-image
   plan:
-  - get: concourse-git-phlow
-    passed: [unit-test-run]
+  - get: concourse-git-phlow  
     trigger: true
+  - get: tollgate
+    passed: [unit-test-run]
   - get: cgp-version
   - get: docker-image-builder
   - task: build-assets
