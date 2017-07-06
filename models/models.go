@@ -51,7 +51,7 @@ type Source struct {
 	PrefixWip         string `json:"prefixwip"`
 	Username          string `json:"username"`
 	Password          string `json:"password"`
-	DataDogApiKey     string `json:"datadog_api_key"`
+	DataDogAPIKey     string `json:"datadog_api_key"`
 	DataDogAppKey     string `json:"datadog_app_key"`
 	DataDogMetricName string `json:"metric_name"`
 }

@@ -3,8 +3,8 @@ resource_types:
 - name: pip
   type: docker-image
   source:
-    repository: groenborg/mwriter-git-phlow
-    tag: '1.0.10'
+    repository: groenborg/concourse-git-phlow
+    tag: '1.0.12'
 
 #SLACK RESOURCE TYPE
 - name: slack-notification
@@ -22,16 +22,19 @@ resources:
     prefixready: ready/
     prefixwip: wip/
     master: master
-    url: https://github.com/Praqma/mwriter-git-phlow.git
+    url: https://github.com/Praqma/concourse-git-phlow.git
     username: {{github-username}}
     password: {{github-password}}
+    datadog_api_key: {{dd_api_key}}
+    datadog_app_key: {{dd_app_key}}
+    metric_name: conocurse_git_phlow
 
 #IMPORT THE BASE GIT RESOURCE SO WE ALWAYS HAVE THE BUILD FROM MASTER
 #DEPENDING ON THE TASK, ONLY CGP IS NECESSARY
-- name: mwriter-git-phlow
+- name: concourse-git-phlow
   type: git
   source:
-    uri: https://github.com/Praqma/mwriter-git-phlow.git
+    uri: https://github.com/Praqma/concourse-git-phlow.git
     branch: master
     username: {{github-username}}
     password: {{github-password}}
@@ -40,7 +43,7 @@ resources:
   type: semver
   source:
     driver: git
-    uri: git@github.com:Praqma/mwriter-git-phlow.git
+    uri: git@github.com:Praqma/concourse-git-phlow.git
     private_key: {{github-private-key}} 
     branch: version
     file: version
@@ -48,7 +51,7 @@ resources:
 - name: docker-image-builder
   type: docker-image
   source:
-    repository: groenborg/mwriter-git-phlow
+    repository: groenborg/concourse-git-phlow
     username: {{docker-username}}
     password: {{docker-password}}
   
@@ -66,7 +69,7 @@ jobs:
   plan:
   - get: tollgate
     trigger: true
-  - get: mwriter-git-phlow
+  - get: concourse-git-phlow
   - get: cgp-version
   - put: cgp-version
     params: {bump: patch}
@@ -84,16 +87,16 @@ jobs:
      
 - name: build-docker-image
   plan:
-  - get: mwriter-git-phlow
+  - get: concourse-git-phlow
     passed: [unit-test-run]
     trigger: true
   - get: cgp-version
   - get: docker-image-builder
   - task: build-assets
-    file: mwriter-git-phlow/ci/tasks/build.yml
+    file: concourse-git-phlow/ci/tasks/build.yml
   - put: docker-image-builder
     params:
-        build: mwriter-git-phlow-artifacts
+        build: concourse-git-phlow-artifacts
         tag: cgp-version/version
         tag_as_latest: true
     

@@ -22,11 +22,11 @@ type DataDog struct {
 //SpawnCerberus...
 func SpawnCerberus(source models.Source) *DataDog {
 	var active = false
-	if source.DataDogAppKey != "" && source.DataDogApiKey != "" {
+	if source.DataDogAppKey != "" && source.DataDogAPIKey != "" {
 		active = true
 	}
 
-	c := datadog.NewClient(source.DataDogApiKey, source.DataDogAppKey)
+	c := datadog.NewClient(source.DataDogAPIKey, source.DataDogAppKey)
 	return &DataDog{Client: c, Name: source.DataDogMetricName, Active: active}
 }
 

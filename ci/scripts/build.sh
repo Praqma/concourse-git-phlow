@@ -11,6 +11,7 @@ cp -R concourse-git-phlow/ $GOPATH/src/github.com/praqma
 # RESOLVE DEPENDENCIES - TEST AND PRODUCTION
 cd $GOPATH/src/github.com/praqma/concourse-git-phlow
 go get github.com/tools/godep
+go get gopkg.in/zorkian/go-datadog-api.v2
 godep restore
 
 export GOOS=linux
