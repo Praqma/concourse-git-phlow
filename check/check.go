@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"os"
 
+	"log"
+
 	"github.com/praqma/concourse-git-phlow/githandler"
 	"github.com/praqma/concourse-git-phlow/models"
+	"github.com/praqma/concourse-git-phlow/mwriter"
 	"github.com/praqma/concourse-git-phlow/repo"
 	"github.com/praqma/git-phlow/phlow"
-	"log"
-	"github.com/praqma/concourse-git-phlow/mwriter"
 )
 
 func main() {
@@ -55,20 +56,24 @@ func main() {
 func getRef(basePath string, request models.CheckRequest) (ref string) {
 	cerberus := mwriter.SpawnCerberus(request.Source)
 
-	chErr := os.Chdir(basePath)
-	if chErr != nil {
-		log.Panicln("no basepath", basePath, chErr)
+	err := os.Chdir(basePath)
+	if err != nil {
+		cerberus.BarkEvent(err.Error(), mwriter.Error)
+		log.Panicln("no basepath", basePath, err)
 	}
 
 	if err := githandler.HardReset(); err != nil {
+		cerberus.BarkEvent(err.Error(), mwriter.Error)
 		log.Panicln(err)
 	}
 
 	if err := githandler.Pull(); err != nil {
+		cerberus.BarkEvent(err.Error(), mwriter.Error)
 		log.Panicln("could not pull from remote: ", err)
 	}
 
 	if err := githandler.FetchPrune(); err != nil {
+		cerberus.BarkEvent(err.Error(), mwriter.Error)
 		log.Panicln("could not fetch from remote: ", err)
 	}
 
@@ -86,17 +91,20 @@ func getRef(basePath string, request models.CheckRequest) (ref string) {
 
 	cerberus.BarkEvent("Integration branch found: "+branchName, mwriter.Info)
 
-	err := githandler.CheckOut(branchName)
+	err = githandler.CheckOut(branchName)
 	if err != nil {
+		cerberus.BarkEvent(err.Error(), mwriter.Error)
 		log.Panicln(err)
 	}
 
 	if ref, err = githandler.RevParse(); err != nil {
+		cerberus.BarkEvent(err.Error(), mwriter.Error)
 		log.Panicln(err)
 	}
 
 	err = githandler.CheckOut(request.Source.MainBranch)
 	if err != nil {
+		cerberus.BarkEvent(err.Error(), mwriter.Error)
 		log.Panicln(err)
 
 	}
