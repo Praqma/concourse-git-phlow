@@ -127,3 +127,6 @@ jobs:
 We communicate through github issues, if there is a feature that you want which does not have an issue, simply create it and we will be in touch. 
 
 To contribute to an existing issue, fork the repository and make a pull request when ready. :wink: 
+
+## CodeScene Analysis report
+[![](https://codescene.io/projects/1475/status.svg) Get more details at **codescene.io**.](https://codescene.io/projects/1475/jobs/latest-successful/results)
